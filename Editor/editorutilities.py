@@ -19,7 +19,6 @@ class UEUtilities:
     def get_editor_executable_path(self):
 
         file_name = self.ue_structure[CONSTANTS.UNREAL_ENGINE_WIN64_CMD_EXE] + self._get_executable_ext()
-
         executable = self.engine_root_path.joinpath(self.ue_structure[CONSTANTS.UNREAL_ENGINE_BINARIES_ROOT],
                                                     self.platform,
                                                     file_name
