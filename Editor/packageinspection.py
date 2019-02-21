@@ -230,11 +230,10 @@ class BasePackageInspection:
 
         return self.archive_obj
 
-    def extract_basic_package_information(self, clean=False):
+    def run(self, clean=False):
         """
         Does a simple engine extract for asset to be able to determine asset type and other basic info
         """
-
         # Delete any existing data
         if clean:
             self._clear_data_from_archive()
@@ -510,7 +509,7 @@ class ProcessPackageInfo:
 
         """
 
-        self.pkg_extractor.extract_basic_package_information()
+        self.pkg_extractor.run()
 
         # Goes through each raw file and saves it out as a json file
         for each_raw_file_path in self.raw_data_dir.glob("**/*.log"):

@@ -50,7 +50,7 @@ class UEUtilities:
         content_value = self.run_config[CONSTANTS.UNREAL_PROJECT_STRUCTURE][CONSTANTS.UNREAL_CONTENT_ROOT_PATH]
         project_root = pathlib.Path(self.run_config[CONSTANTS.UNREAL_PROJECT_ROOT]).resolve()
 
-        content_path = project_root.parent.joinpath(content_value).resolve()
+        content_path = project_root.joinpath(content_value).resolve()
 
         files = []
         for i, each_file in enumerate(content_path.glob("**/*.uasset")):

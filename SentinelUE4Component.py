@@ -4,7 +4,7 @@ import pathlib
 import CONSTANTS
 import sys
 
-from Editor import buildcommands, commandlets
+from Editor import buildcommands, commandlets, packageinspection
 COMMANDS = ["build", "validate", "run"]
 
 
@@ -38,7 +38,7 @@ def get_default_build_presets():
     default_run_config = read_config("")
     build_presets = dict(default_run_config[CONSTANTS.UNREAL_BUILD_SETTINGS_STRUCTURE])
 
-    return ",".join(build_presets.keys())
+    return "\n".join(build_presets.keys())
 
 
 def get_default_automation_tasks():
@@ -61,15 +61,17 @@ def main():
                                      add_help=True,
                                      formatter_class=argparse.RawTextHelpFormatter)
 
-    build_tasks = parser.add_argument_group('Build Tools', 'Config values relating to the build sentinel task')
+    build_tasks = parser.add_argument_group('Build Tools')
     build_tasks.add_argument("-build_preset", default="default",
-                             help="Which config to build (options: all " + default_build_presets + ")")
+                             help="\nall\n" + default_build_presets)
 
-    validate_tasks = parser.add_argument_group('Project Validation', 'Config values relating to the '
-                                                                     'validate sentinel task')
+    validate_tasks = parser.add_argument_group('Project Validation')
 
     validate_tasks.add_argument("-automation_task", default="",
-                                help="\n" + default_validation_tasks)
+                                help=default_validation_tasks)
+
+    validate_tasks.add_argument("-inspect", "--package_inspection", action='store_true',
+                                help="True/False")
 
     parser.add_argument("-config_overwrite",
                         default="",
@@ -92,13 +94,14 @@ def main():
 
             builder.run()
 
-        if args.task.lower() == "validate":
-            if not args.automation_task:
-                print("No automation task configured")
-                sys.exit(1)
-
+        if args.task.lower() == "validate" and args.automation_task:
             commandlet = commandlets.BaseUE4Commandlet(run_config, args.automation_task)
             commandlet.run()
+
+        if args.task.lower() == "validate" and args.package_inspection:
+            print("asdfas")
+            inspection_obj = packageinspection.BasePackageInspection(run_config)
+            inspection_obj.run()
 
     else:
         print(args.task + " " + "is not a valid task...")

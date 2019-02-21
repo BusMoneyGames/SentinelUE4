@@ -186,7 +186,7 @@ class PackageInfoCommandlet(BaseUE4Commandlet):
         """
 
         # Initializes the object
-        super().__init__(run_config, "PkgInfoCommandlet", files=unreal_asset_file_paths)
+        super().__init__(run_config, "_PkgInfoCommandlet", files=unreal_asset_file_paths)
 
         self.unreal_asset_file_paths = unreal_asset_file_paths
         self.asset_type = asset_type
@@ -336,7 +336,7 @@ class CompileAllBlueprints(BaseUE4Commandlet):
 
 class RebuildLightingCommandlet(BaseUE4Commandlet):
     def __init__(self, unreal_paths_object):
-        super().__init__(unreal_paths_object, commandlet_name="BuildLighting")
+        super().__init__(unreal_paths_object, commandlet_name="Build-Lighting")
 
 
 class FillDDCCacheCommandlet(BaseUE4Commandlet):
