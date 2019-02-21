@@ -67,7 +67,7 @@ class TestPackageInfoCommandlet(unittest.TestCase):
 
     def _get_test_files(self):
         content_value = self.path_config[CONSTANTS.UNREAL_PROJECT_STRUCTURE][CONSTANTS.UNREAL_CONTENT_ROOT_PATH]
-        project_root = pathlib.Path(self.path_config[CONSTANTS.PROJECT_FILE_PATH]).resolve()
+        project_root = pathlib.Path(self.path_config[CONSTANTS.UNREAL_PROJECT_ROOT]).resolve()
 
         content_path = project_root.joinpath(content_value)
 

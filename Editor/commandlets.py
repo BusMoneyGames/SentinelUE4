@@ -39,7 +39,7 @@ class BaseUE4Commandlet:
         self.commandlet_settings = commandlet_settings_config[self.commandlet_name]
 
         # Getting paths and making them absolute
-        self.project_root_path = pathlib.Path(self.run_config[CONSTANTS.PROJECT_FILE_PATH]).resolve()
+        self.project_root_path = pathlib.Path(self.run_config[CONSTANTS.UNREAL_PROJECT_ROOT]).resolve()
         self.engine_root_path = pathlib.Path(self.run_config[CONSTANTS.ENGINE_ROOT_PATH]).resolve()
         self.raw_log_path = pathlib.Path(self.run_config[CONSTANTS.TARGET_LOG_FOLDER_PATH]).resolve()
         self.saved_logs_folder_path = pathlib.Path(self.run_config[CONSTANTS.SAVED_LOGS_FOLDER_PATH]).resolve()
@@ -81,7 +81,7 @@ class BaseUE4Commandlet:
         new_args = " ".join(args_list)
 
         engine_executable = self.editor_util.get_editor_executable_path().as_posix()
-        project_file_path = self.run_config[CONSTANTS.PROJECT_FILE_PATH].as_posix()
+        project_file_path = self.run_config[CONSTANTS.UNREAL_PROJECT_ROOT].as_posix()
 
         cmd = engine_executable + " " + project_file_path + " " + new_args + " -LOG=" + self.log_file_name + " -UNATTENDED"
         L.info(cmd)

@@ -39,7 +39,7 @@ def get_path_config_for_test():
     path_config = json.load(f)
     f.close()
 
-    path_config[CONSTANTS.PROJECT_FILE_PATH] = uproject_file_path
+    path_config[CONSTANTS.UNREAL_PROJECT_ROOT] = uproject_file_path
     engine_relative_path = path_config[CONSTANTS.ENGINE_ROOT_PATH]
 
     # If the engine path in the config is not an absolute path then its relative to the project file

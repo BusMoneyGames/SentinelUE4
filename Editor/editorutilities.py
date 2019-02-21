@@ -12,7 +12,7 @@ class UEUtilities:
         self.run_config = run_config
 
         self.ue_structure = self.run_config[CONSTANTS.UNREAL_ENGINE_STRUCTURE]
-        self.project_root_path = pathlib.Path(self.run_config[CONSTANTS.PROJECT_FILE_PATH]).parent
+        self.project_root_path = pathlib.Path(self.run_config[CONSTANTS.UNREAL_PROJECT_ROOT]).parent
 
         self.engine_root_path = pathlib.Path(self.run_config[CONSTANTS.ENGINE_ROOT_PATH])
 
@@ -46,7 +46,7 @@ class UEUtilities:
 
     def get_all_content_files(self):
         content_value = self.run_config[CONSTANTS.UNREAL_PROJECT_STRUCTURE][CONSTANTS.UNREAL_CONTENT_ROOT_PATH]
-        project_root = pathlib.Path(self.run_config[CONSTANTS.PROJECT_FILE_PATH]).resolve()
+        project_root = pathlib.Path(self.run_config[CONSTANTS.UNREAL_PROJECT_ROOT]).resolve()
 
         content_path = project_root.parent.joinpath(content_value).resolve()
 

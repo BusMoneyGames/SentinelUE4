@@ -1,6 +1,6 @@
 {
 
-   "project_file_path":"",
+   "unreal_project_root_path":"../..",
    "engine_path":"../UnrealEngine",
    "commandlets":{
       "PkgInfoCommandlet":{
@@ -123,13 +123,13 @@
          "build_command":"BuildCookRun",
          "build_flags":[
             "cook",
-            "iterate",
-            "nop4",
             "nocompileeditor",
-            "build",
+            "buerroild",
             "stage",
             "archive",
             "pak",
+            "package",
+            "targetplatform=Linux",
             "prereqs"
          ]
       }

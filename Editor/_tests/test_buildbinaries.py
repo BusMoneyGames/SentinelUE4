@@ -34,6 +34,7 @@ class TestEditorBuilder(unittest.TestCase):
         self.editor_builder.run()
 
     def test_get_command(self):
-        self.editor_builder.get_build_command()
+        cmd = self.editor_builder.get_build_command()
+        print(cmd)
 
 
