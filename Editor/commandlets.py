@@ -81,7 +81,7 @@ class BaseUE4Commandlet:
         new_args = " ".join(args_list)
 
         engine_executable = self.editor_util.get_editor_executable_path().as_posix()
-        project_file_path = self.run_config[CONSTANTS.UNREAL_PROJECT_ROOT].as_posix()
+        project_file_path = self.editor_util.get_project_file_path().as_posix()
 
         cmd = engine_executable + " " + project_file_path + " " + new_args + " -LOG=" + self.log_file_name + " -UNATTENDED"
         L.info(cmd)

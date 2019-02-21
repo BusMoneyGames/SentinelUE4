@@ -12,7 +12,7 @@ class UEUtilities:
         self.run_config = run_config
 
         self.ue_structure = self.run_config[CONSTANTS.UNREAL_ENGINE_STRUCTURE]
-        self.project_root_path = pathlib.Path(self.run_config[CONSTANTS.UNREAL_PROJECT_ROOT]).parent
+        self.project_root_path = pathlib.Path(self.run_config[CONSTANTS.UNREAL_PROJECT_ROOT])
 
         self.engine_root_path = pathlib.Path(self.run_config[CONSTANTS.ENGINE_ROOT_PATH])
 
@@ -24,6 +24,9 @@ class UEUtilities:
                                                     self.platform,
                                                     file_name
                                                     )
+
+        executable = self.project_root_path.joinpath(executable).resolve()
+
         return executable
 
     def get_unreal_build_tool_path(self):
@@ -55,6 +58,16 @@ class UEUtilities:
             files.append(each_file)
 
         return files
+
+    def get_project_file_path(self):
+        path = pathlib.Path(self.run_config[CONSTANTS.UNREAL_PROJECT_ROOT])
+
+        for e in path.glob("**/*.uproject"):
+            return e
+
+        raise FileNotFoundError
+
+
 
 
 def clean_unreal_project(project_root_folder):
