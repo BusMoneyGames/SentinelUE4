@@ -3,12 +3,14 @@ import json
 import pathlib
 import CONSTANTS
 import logging
+from Editor import buildcommands, commandlets, packageinspection
+COMMANDS = ["build", "validate", "run"]
+
+FORMAT = '%(message)s'
+logging.basicConfig(format=FORMAT)
 
 L = logging.getLogger()
 L.setLevel(logging.INFO)
-
-from Editor import buildcommands, commandlets, packageinspection
-COMMANDS = ["build", "validate", "run"]
 
 
 def read_config(config_dir):
