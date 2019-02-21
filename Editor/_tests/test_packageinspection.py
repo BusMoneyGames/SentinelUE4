@@ -30,4 +30,4 @@ class TestProcessPackageInfo(unittest.TestCase):
 
     def test_convert_raw_data_to_json(self):
 
-        self.package_processor.convert_raw_data_to_json()
+        self.package_processor.run()

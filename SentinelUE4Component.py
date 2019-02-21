@@ -2,7 +2,10 @@ import argparse
 import json
 import pathlib
 import CONSTANTS
-import sys
+import logging
+
+L = logging.getLogger()
+L.setLevel(logging.INFO)
 
 from Editor import buildcommands, commandlets, packageinspection
 COMMANDS = ["build", "validate", "run"]
@@ -54,6 +57,7 @@ def get_default_automation_tasks():
 
 
 def main():
+    L.info("Do stuff")
     default_build_presets = get_default_build_presets()
     default_validation_tasks = get_default_automation_tasks()
 
@@ -99,8 +103,7 @@ def main():
             commandlet.run()
 
         if args.task.lower() == "validate" and args.package_inspection:
-            print("asdfas")
-            inspection_obj = packageinspection.BasePackageInspection(run_config)
+            inspection_obj = packageinspection.ProcessPackageInfo(run_config)
             inspection_obj.run()
 
     else:

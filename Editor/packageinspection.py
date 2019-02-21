@@ -496,7 +496,7 @@ class ProcessPackageInfo:
         if not self.processed_path.exists():
             os.makedirs(self.processed_path)
 
-    def convert_raw_data_to_json(self):
+    def run(self):
         """
         Goes through all the raw extracted files and extracts any data of interest out of it.  The data of interest is then
         Saved as a json file
