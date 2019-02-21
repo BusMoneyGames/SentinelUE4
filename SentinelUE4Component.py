@@ -27,7 +27,6 @@ def read_config(config_dir):
 
         run_config.update(json_data)
 
-
     relative_project_path = pathlib.Path(run_config[CONSTANTS.UNREAL_PROJECT_ROOT])
     project_root = config_dir.joinpath(relative_project_path).resolve()
     run_config[CONSTANTS.UNREAL_PROJECT_ROOT] = str(project_root)
@@ -39,7 +38,7 @@ def get_default_build_presets():
     default_run_config = read_config("")
     build_presets = dict(default_run_config[CONSTANTS.UNREAL_BUILD_SETTINGS_STRUCTURE])
 
-    return " ".join(build_presets.keys())
+    return ",".join(build_presets.keys())
 
 
 def get_default_automation_tasks():
@@ -58,7 +57,9 @@ def main():
     default_build_presets = get_default_build_presets()
     default_validation_tasks = get_default_automation_tasks()
 
-    parser = argparse.ArgumentParser(description='Runs sentinel tasks for Unreal Engine.', add_help=True)
+    parser = argparse.ArgumentParser(description='Runs sentinel tasks for Unreal Engine.',
+                                     add_help=True,
+                                     formatter_class=argparse.RawTextHelpFormatter)
 
     build_tasks = parser.add_argument_group('Build Tools', 'Config values relating to the build sentinel task')
     build_tasks.add_argument("-build_preset", default="default",
@@ -68,7 +69,7 @@ def main():
                                                                      'validate sentinel task')
 
     validate_tasks.add_argument("-automation_task", default="",
-                                help="Runs an automation task( options: all " + default_validation_tasks + ")")
+                                help="\n" + default_validation_tasks)
 
     parser.add_argument("-config_overwrite",
                         default="",

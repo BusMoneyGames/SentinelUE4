@@ -3,7 +3,7 @@
    "unreal_project_root_path":"../..",
    "engine_path":"../UnrealEngine",
    "commandlets":{
-      "PkgInfoCommandlet":{
+      "_PkgInfoCommandlet":{
          "command":"PkgInfoCommandlet",
          "detail_extract_types":["Blueprint", "StaticMesh"],
          "flags":[
@@ -22,7 +22,7 @@
             ]
 
       },
-      "BuildLighting":{
+      "Build-Lighting":{
          "command":"ResavePackages",
          "flags":[
             "buildlighting",
@@ -36,20 +36,20 @@
             "projectonly"
          ]
       },
-      "ResavePackages":{
+      "Resave-All-Packages":{
          "command":"ResavePackages",
          "flags":[
             "ignorechangelist",
             "projectonly"
          ]
       },
-      "CompileAllBlueprints":{
+      "Compile-Blueprints":{
          "command":"CompileAllBlueprints",
          "flags":["projectonly"
 
          ]
       },
-      "ResaveAllBlueprints":{
+      "Resave-Blueprints":{
          "command":"ResavePackages",
          "flags":[
             "-IncludeChildClasses",
@@ -58,7 +58,7 @@
             "projectonly"
          ]
       },
-      "ResaveAllMaps":{
+      "Resave-Levels":{
          "command":"ResavePackages",
          "flags":[
             "-IncludeChildClasses",
