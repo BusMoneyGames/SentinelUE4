@@ -20,6 +20,7 @@ class BaseUnrealBuilder:
         """
 
         self.run_config = run_config
+        self.environment_structure = self.run_config[CONSTANTS.ENVIRONMENT_CATEGORY]
         self.all_build_settings = self.run_config[CONSTANTS.UNREAL_BUILD_SETTINGS_STRUCTURE]
 
         # TODO Add logic to be able to switch the build settings
@@ -29,7 +30,7 @@ class BaseUnrealBuilder:
         self.platform = self.build_settings[CONSTANTS.UNREAL_BUILD_PLATFORM_NAME]
         self.editor_util = editorUtilities.UEUtilities(run_config, self.platform)
 
-        self.project_root_path = pathlib.Path(run_config[CONSTANTS.UNREAL_PROJECT_ROOT])
+        self.project_root_path = pathlib.Path(self.environment_structure[CONSTANTS.UNREAL_PROJECT_ROOT])
 
         self.sentinel_project_structure = self.run_config[CONSTANTS.SENTINEL_PROJECT_STRUCTURE]
 
@@ -173,7 +174,7 @@ class UnrealClientBuilder(BaseUnrealBuilder):
 
         project_path = self.editor_util.get_project_file_path()
 
-        engine_root = self.project_root_path.joinpath(self.run_config[CONSTANTS.ENGINE_ROOT_PATH]).resolve()
+        engine_root = self.project_root_path.joinpath(self.environment_structure[CONSTANTS.ENGINE_ROOT_PATH]).resolve()
 
         build_command_name = self.build_settings[CONSTANTS.UNREAL_BUILD_COMMAND_NAME]
         build_config = self.build_settings[CONSTANTS.UNREAL_BUILD_CONFIGURATION]

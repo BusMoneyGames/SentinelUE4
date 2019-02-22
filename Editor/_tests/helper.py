@@ -4,43 +4,42 @@ import CONSTANTS
 import json
 
 
-def recursively_search_for_file_down_a_directory(file_suffix):
-    """
-    finds the folder path of the script
-    :return: root path
-    """
+def read_config(config_dir):
+    config_dir = pathlib.Path(config_dir).resolve()
 
-    script_file = pathlib.PurePath(os.path.realpath(__file__))
+    if not config_dir.exists():
+        print("Unable to find a run config directory at: %", str(config_dir))
+    else:
+        pass
+        # print("Reading Config from directory: ", str(config_dir))
 
-    # Walks down the folder structure looking for the uproject file to identify the root of the project
-    level_to_check = len(script_file.parents) - 1
+    run_config = {}
 
-    while level_to_check >= 0:
-        path_to_check = pathlib.Path(script_file.parents[level_to_check])
-        for each_file in path_to_check.glob("*.*"):
-            # Check if the file has the correct suffix
-            if each_file.suffix == file_suffix:
-                return each_file
-        # Go lower
-        level_to_check = level_to_check - 1
+    for each_file in config_dir.glob("**/*.json"):
 
-    print("No file found")
-    return None
+        f = open(str(each_file))
+        json_data = json.load(f)
+        f.close()
+
+        run_config.update(json_data)
+
+    env_category = run_config[CONSTANTS.ENVIRONMENT_CATEGORY]
+    relative_project_path = pathlib.Path(env_category[CONSTANTS.UNREAL_PROJECT_ROOT])
+    project_root = config_dir.joinpath(relative_project_path).resolve()
+    env_category[CONSTANTS.UNREAL_PROJECT_ROOT] = str(project_root)
+    run_config[CONSTANTS.ENVIRONMENT_CATEGORY] = env_category
+
+    return run_config
 
 
 def get_path_config_for_test():
-    uproject_file_path = recursively_search_for_file_down_a_directory(file_suffix=".uproject")
 
     # Test config file
-    path = pathlib.Path("../../_test_config.json").resolve()
+    path = pathlib.Path("../../defaultConfig").resolve()
 
-    # Read the config
-    f = open(path)
-    path_config = json.load(f)
-    f.close()
+    config = read_config(path)
 
-    path_config[CONSTANTS.UNREAL_PROJECT_ROOT] = uproject_file_path.parent
+    import pprint
+    pprint.pprint(config)
+    return config
 
-    # If the engine path in the config is not an absolute path then its relative to the project file
-
-    return path_config

@@ -12,9 +12,11 @@ class UEUtilities:
         self.run_config = run_config
 
         self.ue_structure = self.run_config[CONSTANTS.UNREAL_ENGINE_STRUCTURE]
-        self.project_root_path = pathlib.Path(self.run_config[CONSTANTS.UNREAL_PROJECT_ROOT])
+        self.environment_structure = self.run_config[CONSTANTS.ENVIRONMENT_CATEGORY]
 
-        self.engine_root_path = pathlib.Path(self.run_config[CONSTANTS.ENGINE_ROOT_PATH])
+        self.project_root_path = pathlib.Path(self.environment_structure[CONSTANTS.UNREAL_PROJECT_ROOT])
+
+        self.engine_root_path = pathlib.Path(self.environment_structure[CONSTANTS.ENGINE_ROOT_PATH])
 
     def get_editor_executable_path(self):
 
@@ -59,8 +61,8 @@ class UEUtilities:
         return files
 
     def get_project_file_path(self):
-        path = pathlib.Path(self.run_config[CONSTANTS.UNREAL_PROJECT_ROOT])
-
+        path = pathlib.Path(self.environment_structure[CONSTANTS.UNREAL_PROJECT_ROOT])
+        print(path)
         for e in path.glob("**/*.uproject"):
             return e
 
