@@ -1,0 +1,26 @@
+{  
+   "Type":"StaticMesh",
+   "Convention":"[Prefix]_[AssetName][Iterator]",
+   "Convention_Detail":[  
+      {  
+         "Name":"Prefix",
+         "Valid":[  
+            "SM"
+         ]
+      }
+   ],
+   "Subtypes":[  
+      {  
+         "SubTypeName":"BuildingModule",
+         "Convention":"[Prefix]_[BuildingType]_[AssetName][Iterator]",
+         "Convention_Detail":[  
+            {  
+               "Name":"BuildingType",
+               "Valid":[  
+                  "SM"
+               ]
+            }
+         ]
+      }
+   ]
+}

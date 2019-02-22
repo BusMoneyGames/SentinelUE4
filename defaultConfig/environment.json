@@ -1,0 +1,6 @@
+{
+	"environment":{
+	   "unreal_project_root_path":"../..",
+	   "engine_path":"../UnrealEngine",
+	}
+}

@@ -59,7 +59,6 @@ def get_default_automation_tasks():
 
 
 def main():
-    L.info("Do stuff")
     default_build_presets = get_default_build_presets()
     default_validation_tasks = get_default_automation_tasks()
 
