@@ -1,59 +1,54 @@
 import unittest
-import logging
 import Editor.commandlets as commandlets
 import pathlib
 import CONSTANTS
 import Editor._tests.helper as helper
 
+import logging
+
+FORMAT = '%(message)s'
+logging.basicConfig(format=FORMAT)
+
 L = logging.getLogger()
+L.setLevel(logging.DEBUG)
 
 
-class TestResavePackages(unittest.TestCase):
+class TestDefaultCommandlets(unittest.TestCase):
 
     def setUp(self):
-        L.setLevel(logging.DEBUG)
+        L.debug("Iterates through all the default commandlets and runs them")
+        self.run_config = helper.get_path_config_for_test()
+        self.commandlets = dict(self.run_config[CONSTANTS.COMMANDLET_SETTINGS])
 
-        path_config = helper.get_path_config_for_test()
-        self.resave_packages_commandlet = commandlets.ResavePackages(path_config)
+    def test_runAll(self):
 
-    def test_get_command(self):
-        command = self.resave_packages_commandlet.get_command()
-        print(command)
+        L.debug("Found %s commandlets", len(self.commandlets.keys()))
+        L.debug("\n".join(self.commandlets.keys()))
 
-    def test_run(self):
-        self.resave_packages_commandlet.run()
+        for each_commandlet in self.commandlets.keys():
+            L.info(self.commandlets[each_commandlet])
+
+    def test_compileblueprints(self):
+
+        cmd = commandlets.BaseUE4Commandlet(run_config=self.run_config, commandlet_name="Compile-Blueprints")
+        cmd.run()
+
+    def test_resaveAllPackages(self):
+
+        cmd = commandlets.BaseUE4Commandlet(run_config=self.run_config, commandlet_name="Resave-All-Packages")
+        cmd.run()
+
+    def test_resaveBlueprints(self):
+
+        cmd = commandlets.BaseUE4Commandlet(run_config=self.run_config, commandlet_name="Resave-Blueprints")
+        cmd.run()
+
+    def test_resaveLevels(self):
+
+        cmd = commandlets.BaseUE4Commandlet(run_config=self.run_config, commandlet_name="Resave-Levels")
+        cmd.run()
 
 
-class TestCompileAllBlueprints(unittest.TestCase):
-    def setUp(self):
-
-        L.setLevel(logging.DEBUG)
-
-        path_config = helper.get_path_config_for_test()
-        self.compile_blueprints = commandlets.CompileAllBlueprints(path_config)
-
-    def test_get_command(self):
-        command = self.compile_blueprints.get_command()
-        print(command)
-
-    def test_run(self):
-        self.compile_blueprints.run()
-
-
-class TestRebuildLightingCommandlet(unittest.TestCase):
-    def setUp(self):
-        L.setLevel(logging.DEBUG)
-
-        path_config = helper.get_path_config_for_test()
-
-        self.rebuild_lighting = commandlets.RebuildLightingCommandlet(path_config)
-
-    def test_get_command(self):
-        command = self.rebuild_lighting.get_command()
-
-    def test_run(self):
-        self.skipTest("Light building is broken in the engine")
-        self.rebuild_lighting.run()
 
 
 class TestPackageInfoCommandlet(unittest.TestCase):

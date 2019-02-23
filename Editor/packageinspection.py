@@ -482,7 +482,7 @@ class ProcessPackageInfo:
 
     def _construct_paths(self):
         """Makes the paths for outputs inside of the root artifact folder"""
-        project_root = pathlib.Path(self.run_config[CONSTANTS.UNREAL_PROJECT_ROOT]).parent
+        project_root = pathlib.Path(self.run_config[CONSTANTS.UNREAL_PROJECT_ROOT])
         artifact_root = pathlib.Path(project_root).joinpath(self.sentinel_structure[CONSTANTS.SENTINEL_PROJECT_NAME])
 
         self.archive_folder_path = artifact_root.joinpath(self.sentinel_structure[CONSTANTS.SENTINEL_ARCHIVES_PATH]).resolve()

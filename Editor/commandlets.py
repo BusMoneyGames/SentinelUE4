@@ -1,7 +1,6 @@
 # coding=utf-8
 import subprocess
 import shutil
-import sys
 import os
 import logging
 import pathlib
@@ -24,6 +23,8 @@ class BaseUE4Commandlet:
 
         self.run_config = run_config
         self.commandlet_name = commandlet_name
+        self.environment_config = self.run_config[CONSTANTS.ENVIRONMENT_CATEGORY]
+        self.sentinel_structure_config = self.run_config[CONSTANTS.SENTINEL_PROJECT_STRUCTURE]
         self.files = files
         self.platform = platform
 
@@ -39,10 +40,13 @@ class BaseUE4Commandlet:
         self.commandlet_settings = commandlet_settings_config[self.commandlet_name]
 
         # Getting paths and making them absolute
-        self.project_root_path = pathlib.Path(self.run_config[CONSTANTS.UNREAL_PROJECT_ROOT]).resolve()
-        self.engine_root_path = pathlib.Path(self.run_config[CONSTANTS.ENGINE_ROOT_PATH]).resolve()
-        self.raw_log_path = pathlib.Path(self.run_config[CONSTANTS.TARGET_LOG_FOLDER_PATH]).resolve()
-        self.saved_logs_folder_path = pathlib.Path(self.run_config[CONSTANTS.SAVED_LOGS_FOLDER_PATH]).resolve()
+        self.project_root_path = pathlib.Path(self.environment_config[CONSTANTS.UNREAL_PROJECT_ROOT]).resolve()
+
+        L.debug("Project Root Path: %s", self.project_root_path)
+        self.engine_root_path = pathlib.Path(self.environment_config[CONSTANTS.ENGINE_ROOT_PATH]).resolve()
+
+        self.raw_log_path = self.project_root_path.joinpath(self.environment_config[CONSTANTS.SENTINEL_ARTIFACTS_ROOT_PATH])
+        self.raw_log_path = self.raw_log_path.resolve()
 
         # Information about the relative structure of ue4
         self.ue_structure = self.run_config[CONSTANTS.UNREAL_ENGINE_STRUCTURE]
@@ -318,27 +322,11 @@ class PackageInfoCommandlet(BaseUE4Commandlet):
         return asset_name
 
 
-class ResavePackages(BaseUE4Commandlet):
+def get_commandlet_class(run_config, commandlet_name):
+    """
+    return a commandlet class if an overwrite exitst
+    :param commandlet_name:
+    :return:
+    """
 
-    def __init__(self, unreal_paths_object):
-        super().__init__(unreal_paths_object, commandlet_name="ResavePackages")
-
-
-class ResaveAllBlueprints(BaseUE4Commandlet):
-    def __init__(self, unreal_paths_object):
-        super().__init__(unreal_paths_object, commandlet_name="ResaveAllBlueprints")
-
-
-class CompileAllBlueprints(BaseUE4Commandlet):
-    def __init__(self, unreal_paths_object):
-        super().__init__(unreal_paths_object, commandlet_name="CompileAllBlueprints")
-
-
-class RebuildLightingCommandlet(BaseUE4Commandlet):
-    def __init__(self, unreal_paths_object):
-        super().__init__(unreal_paths_object, commandlet_name="Build-Lighting")
-
-
-class FillDDCCacheCommandlet(BaseUE4Commandlet):
-    def __init__(self, unreal_paths_object):
-        super().__init__(unreal_paths_object, commandlet_name="FillDDCCache")
+    return BaseUE4Commandlet(run_config, commandlet_name)

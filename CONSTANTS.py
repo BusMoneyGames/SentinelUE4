@@ -1,7 +1,9 @@
 
 ENVIRONMENT_CATEGORY = "environment"
 ENGINE_ROOT_PATH = "engine_path"
+SENTINEL_ARTIFACTS_ROOT_PATH = "sentinel_artifacts_path"
 UNREAL_PROJECT_ROOT = "unreal_project_root_path"
+
 COMMANDLET_SETTINGS = "commandlets"
 
 # Location in the unreal project where teh log is saved
@@ -21,7 +23,6 @@ UNREAL_CONTENT_ROOT_PATH = "content_root_path"
 SENTINEL_PROJECT_STRUCTURE = "sentinel_project_structure"
 SENTINEL_PROJECT_NAME = "sentinel_project_name"
 SENTINEL_RAW_LOGS_PATH = "sentinel_raw_logs_path"
-SENTINEL_ARCHIVES_PATH = "sentinel_archives_path"
 SENTINEL_PROCESSED_PATH = "sentinel_processed_path"
 SENTINEL_BUILD_PATH = "sentinel_build_path"
 SENTINEL_DEFAULT_COOK_FILE_NAME = "sentinel_default_cook_log_name"

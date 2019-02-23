@@ -4,6 +4,7 @@ import CONSTANTS
 import json
 
 
+
 def read_config(config_dir):
     config_dir = pathlib.Path(config_dir).resolve()
 
@@ -26,6 +27,7 @@ def read_config(config_dir):
     env_category = run_config[CONSTANTS.ENVIRONMENT_CATEGORY]
     relative_project_path = pathlib.Path(env_category[CONSTANTS.UNREAL_PROJECT_ROOT])
     project_root = config_dir.joinpath(relative_project_path).resolve()
+
     env_category[CONSTANTS.UNREAL_PROJECT_ROOT] = str(project_root)
     run_config[CONSTANTS.ENVIRONMENT_CATEGORY] = env_category
 

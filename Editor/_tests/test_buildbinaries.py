@@ -2,6 +2,14 @@ import unittest
 import Editor.buildcommands as buildcommands
 import Editor._tests.helper as helper
 
+import logging
+
+FORMAT = '%(message)s'
+logging.basicConfig(format=FORMAT)
+
+L = logging.getLogger()
+L.setLevel(logging.DEBUG)
+
 
 class TestClientBuilder(unittest.TestCase):
 
