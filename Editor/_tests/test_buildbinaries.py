@@ -14,6 +14,7 @@ L.setLevel(logging.DEBUG)
 class TestClientBuilder(unittest.TestCase):
 
     def setUp(self):
+        helper.clean_compile_project()
         path_config = helper.get_path_config_for_test()
 
         self.client_builder = buildcommands.UnrealClientBuilder(path_config)
@@ -31,10 +32,15 @@ class TestClientBuilder(unittest.TestCase):
         cmd = buildcommands.UnrealClientBuilder(path_config, build_config_name="server")
         cmd.run()
 
+    def tearDown(self):
+        helper.clean_compile_project()
+
+
 
 class TestEditorBuilder(unittest.TestCase):
 
     def setUp(self):
+        helper.clean_compile_project()
         path_config = helper.get_path_config_for_test()
         self.editor_builder = buildcommands.UnrealEditorBuilder(path_config)
 
@@ -44,5 +50,10 @@ class TestEditorBuilder(unittest.TestCase):
     def test_get_command(self):
         cmd = self.editor_builder.get_build_command()
         print(cmd)
+
+    def tearDown(self):
+        helper.clean_compile_project()
+
+
 
 

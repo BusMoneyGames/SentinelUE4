@@ -16,6 +16,7 @@ L.setLevel(logging.DEBUG)
 class TestDefaultCommandlets(unittest.TestCase):
 
     def setUp(self):
+        helper.clean_compile_project()
         L.debug("Iterates through all the default commandlets and runs them")
         self.run_config = helper.get_path_config_for_test()
         self.commandlets = dict(self.run_config[CONSTANTS.COMMANDLET_SETTINGS])
