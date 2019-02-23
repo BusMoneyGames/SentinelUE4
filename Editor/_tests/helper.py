@@ -1,8 +1,30 @@
-import os
+import git
 import pathlib
 import CONSTANTS
 import json
+import Editor.buildcommands as buildcommands
 
+
+def reset_ue_repo():
+    """
+    cleans the git repo so that it is clean to run
+    :return:
+    """
+
+    run_config = get_path_config_for_test()
+    environment = run_config[CONSTANTS.ENVIRONMENT_CATEGORY]
+    project_root = pathlib.Path(environment[CONSTANTS.UNREAL_PROJECT_ROOT])
+
+    repo = git.Repo(str(project_root.parent))
+    clean_result = repo.git.execute(["git", "clean", "-dfx"])
+    reset_Result = repo.git.execute(["git", "reset", "--hard"])
+
+
+def clean_compile_project():
+
+    reset_ue_repo()
+    editor_builder = buildcommands.UnrealEditorBuilder(get_path_config_for_test())
+    editor_builder.run()
 
 
 def read_config(config_dir):
@@ -42,4 +64,3 @@ def get_path_config_for_test():
     config = read_config(path)
 
     return config
-

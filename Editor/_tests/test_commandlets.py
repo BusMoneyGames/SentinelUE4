@@ -48,6 +48,9 @@ class TestDefaultCommandlets(unittest.TestCase):
         cmd = commandlets.BaseUE4Commandlet(run_config=self.run_config, commandlet_name="Resave-Levels")
         cmd.run()
 
+    def tearDown(self):
+        helper.clean_compile_project()
+
 
 
 

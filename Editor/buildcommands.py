@@ -116,7 +116,7 @@ class UnrealEditorBuilder(BaseUnrealBuilder):
         :return: build command
         """
 
-        project_path = "-project=" + "\"" + str(self.run_config[CONSTANTS.UNREAL_PROJECT_ROOT]) + "\""
+        project_path = "-project=" + "\"" + str(self.editor_util.get_project_file_path()) + "\""
 
         # TODO after upgrading to 4.20 then I need to skip the project name to be able to compile the editor
         unreal_build_tool_path = self.editor_util.get_unreal_build_tool_path()
