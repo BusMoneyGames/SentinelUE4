@@ -172,7 +172,7 @@ class BasePackageInspection:
     def __init__(self, run_config):
 
         self.run_config = run_config
-
+        self.environment_config = run_config[CONSTANTS.ENVIRONMENT_CATEGORY]
         self.sentinel_structure = run_config[CONSTANTS.SENTINEL_PROJECT_STRUCTURE]
         self._construct_paths()
 
@@ -186,12 +186,11 @@ class BasePackageInspection:
 
     def _construct_paths(self):
         """Makes the paths for outputs inside of the root artifact folder"""
-        project_root = pathlib.Path(self.run_config[CONSTANTS.UNREAL_PROJECT_ROOT]).parent
-        artifact_root = pathlib.Path(project_root).joinpath(self.sentinel_structure[CONSTANTS.SENTINEL_PROJECT_NAME])
 
-        self.archive_folder_path = artifact_root.joinpath(self.sentinel_structure[CONSTANTS.SENTINEL_ARCHIVES_PATH]).resolve()
-        self.raw_data_dir = artifact_root.joinpath(self.sentinel_structure[CONSTANTS.SENTINEL_RAW_LOGS_PATH]).resolve()
-        self.processed_path = artifact_root.joinpath(self.sentinel_structure[CONSTANTS.SENTINEL_PROCESSED_PATH]).resolve()
+        self.sentinel_root = self.environment_config[CONSTANTS.SENTINEL_ARTIFACTS_ROOT_PATH]
+        self.archive_folder_path = self.sentinel_root.joinpath(self.sentinel_structure[CONSTANTS.SENTINEL_CACHE_ROOT]).resolve()
+        self.raw_data_dir = self.sentinel_root.joinpath(self.sentinel_structure[CONSTANTS.SENTINEL_RAW_LOGS_PATH]).resolve()
+        self.processed_path = self.sentinel_root.joinpath(self.sentinel_structure[CONSTANTS.SENTINEL_PROCESSED_PATH]).resolve()
 
         if not self.archive_folder_path.exists():
             os.makedirs(self.archive_folder_path)
@@ -199,6 +198,7 @@ class BasePackageInspection:
             os.makedirs(self.raw_data_dir)
         if not self.processed_path.exists():
             os.makedirs(self.processed_path)
+
 
     def get_files_in_project(self):
         """
@@ -475,6 +475,7 @@ class ProcessPackageInfo:
     def __init__(self, run_config):
 
         self.run_config = run_config
+        self.environment_config = run_config[CONSTANTS.ENVIRONMENT_CATEGORY]
         self.sentinel_structure = run_config[CONSTANTS.SENTINEL_PROJECT_STRUCTURE]
         self._construct_paths()
 
@@ -482,12 +483,11 @@ class ProcessPackageInfo:
 
     def _construct_paths(self):
         """Makes the paths for outputs inside of the root artifact folder"""
-        project_root = pathlib.Path(self.run_config[CONSTANTS.UNREAL_PROJECT_ROOT])
-        artifact_root = pathlib.Path(project_root).joinpath(self.sentinel_structure[CONSTANTS.SENTINEL_PROJECT_NAME])
 
-        self.archive_folder_path = artifact_root.joinpath(self.sentinel_structure[CONSTANTS.SENTINEL_ARCHIVES_PATH]).resolve()
-        self.raw_data_dir = artifact_root.joinpath(self.sentinel_structure[CONSTANTS.SENTINEL_RAW_LOGS_PATH]).resolve()
-        self.processed_path = artifact_root.joinpath(self.sentinel_structure[CONSTANTS.SENTINEL_PROCESSED_PATH]).resolve()
+        self.sentinel_root = self.environment_config[CONSTANTS.SENTINEL_ARTIFACTS_ROOT_PATH]
+        self.archive_folder_path = self.sentinel_root.joinpath(self.sentinel_structure[CONSTANTS.SENTINEL_CACHE_ROOT]).resolve()
+        self.raw_data_dir = self.sentinel_root.joinpath(self.sentinel_structure[CONSTANTS.SENTINEL_RAW_LOGS_PATH]).resolve()
+        self.processed_path = self.sentinel_root.joinpath(self.sentinel_structure[CONSTANTS.SENTINEL_PROCESSED_PATH]).resolve()
 
         if not self.archive_folder_path.exists():
             os.makedirs(self.archive_folder_path)

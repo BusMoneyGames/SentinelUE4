@@ -1,5 +1,4 @@
 {   "sentinel_project_structure":{
-      "sentinel_project_name":"SentinelArtifacts",
       "sentinel_raw_logs_path":"Raw/",
       "sentinel_archives_path": "Cache/",
       "sentinel_processed_path": "Processed/",

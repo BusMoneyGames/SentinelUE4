@@ -9,7 +9,13 @@ L = logging.getLogger()
 class TestInspectPackages(unittest.TestCase):
 
     def setUp(self):
+        self.is_first_run = True
         L.setLevel(logging.DEBUG)
+
+        if self.is_first_run:
+            helper.clean_compile_project()
+            self.is_first_run = False
+
         run_config = helper.get_path_config_for_test()
         self.package_inspection = packageinspection.BasePackageInspection(run_config)
 

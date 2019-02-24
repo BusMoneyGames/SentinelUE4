@@ -38,13 +38,20 @@ def read_config(config_dir):
 
     run_config = {}
 
+    asset_types = []
     for each_file in config_dir.glob("**/*.json"):
 
         f = open(str(each_file))
         json_data = json.load(f)
         f.close()
 
-        run_config.update(json_data)
+        if "type_" in each_file.name:
+            asset_types.append(json_data)
+
+        else:
+            run_config.update(json_data)
+
+    run_config.update({"AssetTypes": asset_types})
 
     env_category = run_config[CONSTANTS.ENVIRONMENT_CATEGORY]
     relative_project_path = pathlib.Path(env_category[CONSTANTS.UNREAL_PROJECT_ROOT])

@@ -2,6 +2,6 @@
 	"environment":{
 	   "unreal_project_root_path":"../../..",
 	   "engine_path":"../UnrealEngine",
-	   "sentinel_artifacts_path": "../"
+	   "sentinel_artifacts_path": "../SentinelArtifacts"
 	}
 }

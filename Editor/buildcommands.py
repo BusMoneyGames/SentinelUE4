@@ -34,11 +34,10 @@ class BaseUnrealBuilder:
 
         self.sentinel_project_structure = self.run_config[CONSTANTS.SENTINEL_PROJECT_STRUCTURE]
 
-        sentinel_project_name = self.sentinel_project_structure[CONSTANTS.SENTINEL_PROJECT_NAME]
+        sentinel_root = pathlib.Path(self.environment_structure[CONSTANTS.SENTINEL_ARTIFACTS_ROOT_PATH])
         sentinel_logs_path = self.sentinel_project_structure[CONSTANTS.SENTINEL_RAW_LOGS_PATH]
 
-        self.log_output_folder = self.project_root_path.joinpath(sentinel_project_name,
-                                                                 sentinel_logs_path)
+        self.log_output_folder = sentinel_root.joinpath(sentinel_logs_path)
 
         self.log_output_file_name = "Default_Log.log"
 
