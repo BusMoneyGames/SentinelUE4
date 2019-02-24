@@ -54,36 +54,3 @@ class TestDefaultCommandlets(unittest.TestCase):
 
 
 
-
-class TestPackageInfoCommandlet(unittest.TestCase):
-    def setUp(self):
-        L.setLevel(logging.DEBUG)
-
-        self.path_config = helper.get_path_config_for_test()
-
-        files = self._get_test_files()
-        self.package_info_commandlet = commandlets.PackageInfoCommandlet(self.path_config, files)
-
-    def _get_test_files(self):
-        content_value = self.path_config[CONSTANTS.UNREAL_PROJECT_STRUCTURE][CONSTANTS.UNREAL_CONTENT_ROOT_PATH]
-        project_root = pathlib.Path(self.path_config[CONSTANTS.UNREAL_PROJECT_ROOT]).resolve()
-
-        content_path = project_root.joinpath(content_value)
-
-        files = []
-        for i, each_file in enumerate(content_path.glob("**/*.uasset")):
-            files.append(each_file)
-
-            if i > 5:
-                break
-
-        return files
-
-    def test_get_command(self):
-        command = self.package_info_commandlet.get_command()
-        print(command)
-
-    def test_run(self):
-        self.package_info_commandlet.run()
-
-

@@ -155,7 +155,7 @@ class UnrealClientBuilder(BaseUnrealBuilder):
 
     def get_archive_directory(self):
 
-        sentinel_output_root = self.sentinel_project_structure[CONSTANTS.SENTINEL_PROJECT_NAME]
+        sentinel_output_root = self.environment_structure[CONSTANTS.SENTINEL_ARTIFACTS_ROOT_PATH]
         build_folder_name = self.sentinel_project_structure[CONSTANTS.SENTINEL_BUILD_PATH]
         out_dir = self.project_root_path.joinpath(sentinel_output_root, build_folder_name, self.build_config_name)
 
