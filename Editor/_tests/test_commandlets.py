@@ -50,7 +50,7 @@ class TestDefaultCommandlets(unittest.TestCase):
         cmd.run()
 
     def tearDown(self):
-        helper.clean_compile_project()
+        helper.reset_ue_repo()
 
 
 

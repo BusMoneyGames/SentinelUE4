@@ -33,8 +33,7 @@ class TestClientBuilder(unittest.TestCase):
         cmd.run()
 
     def tearDown(self):
-        helper.clean_compile_project()
-
+        helper.reset_ue_repo()
 
 
 class TestEditorBuilder(unittest.TestCase):
@@ -52,7 +51,8 @@ class TestEditorBuilder(unittest.TestCase):
         print(cmd)
 
     def tearDown(self):
-        helper.clean_compile_project()
+        helper.reset_ue_repo()
+
 
 
 
