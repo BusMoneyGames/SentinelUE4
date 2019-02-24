@@ -2,7 +2,7 @@ import unittest
 import Editor.commandlets as commandlets
 import pathlib
 import CONSTANTS
-import Editor._tests.helper as helper
+import _tests.helper as helper
 
 import logging
 

@@ -1,7 +1,30 @@
-import os
+import git
 import pathlib
 import CONSTANTS
 import json
+import Editor.buildcommands as buildcommands
+
+
+def reset_ue_repo():
+    """
+    cleans the git repo so that it is clean to run
+    :return:
+    """
+
+    run_config = get_path_config_for_test()
+    environment = run_config[CONSTANTS.ENVIRONMENT_CATEGORY]
+    project_root = pathlib.Path(environment[CONSTANTS.UNREAL_PROJECT_ROOT])
+
+    repo = git.Repo(str(project_root.parent))
+    clean_result = repo.git.execute(["git", "clean", "-dfx"])
+    reset_Result = repo.git.execute(["git", "reset", "--hard"])
+
+
+def clean_compile_project():
+
+    reset_ue_repo()
+    editor_builder = buildcommands.UnrealEditorBuilder(get_path_config_for_test())
+    editor_builder.run()
 
 
 def read_config(config_dir):
@@ -26,6 +49,13 @@ def read_config(config_dir):
     env_category = run_config[CONSTANTS.ENVIRONMENT_CATEGORY]
     relative_project_path = pathlib.Path(env_category[CONSTANTS.UNREAL_PROJECT_ROOT])
     project_root = config_dir.joinpath(relative_project_path).resolve()
+
+    # Resolves all relative paths in the project structure to absolute paths
+    for each_value in env_category.keys():
+        if not each_value == CONSTANTS.UNREAL_PROJECT_ROOT:
+            each_relative_path = env_category[each_value]
+            env_category[each_value] = project_root.joinpath(each_relative_path).resolve()
+
     env_category[CONSTANTS.UNREAL_PROJECT_ROOT] = str(project_root)
     run_config[CONSTANTS.ENVIRONMENT_CATEGORY] = env_category
 
@@ -40,4 +70,3 @@ def get_path_config_for_test():
     config = read_config(path)
 
     return config
-
