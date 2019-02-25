@@ -72,7 +72,8 @@ def read_config(config_dir):
 def get_path_config_for_test():
 
     # Test config file
-    path = pathlib.Path("../../defaultConfig").resolve()
+    current_dir = pathlib.Path(pathlib.Path(__file__).parent)
+    path = current_dir.joinpath("../defaultConfig").resolve()
 
     config = read_config(path)
 
