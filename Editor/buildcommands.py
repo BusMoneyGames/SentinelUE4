@@ -223,6 +223,11 @@ class UnrealClientBuilder(BaseUnrealBuilder):
         :return: None
         """
 
+        # TODO move the should compile flag to a constant
+        if self.build_settings["should_compile"]:
+            editor_builder = UnrealEditorBuilder(self.run_config)
+            editor_builder.run()
+
         super(UnrealClientBuilder, self).run()
 
     def package_for_testing(self):
