@@ -54,6 +54,19 @@ class TestEditorBuilder(unittest.TestCase):
         helper.reset_ue_repo()
 
 
+class TestBuildShaderCompiler(unittest.TestCase):
 
+    def setUp(self):
+        self.path_config = helper.get_path_config_for_test()
+        self.shader_compile_builder = buildcommands.EditorComponentBuilder(self.path_config)
 
+    def test_shader_compiler_builder(self):
+        cmd = self.shader_compile_builder = buildcommands.EditorComponentBuilder(self.path_config,
+                                                                                 component_name="ShaderCompileWorker")
+        cmd.run()
+
+    def test_lightmass_builder(self):
+        cmd = self.shader_compile_builder = buildcommands.EditorComponentBuilder(self.path_config,
+                                                                                 component_name="UnrealLightmass")
+        cmd.run()
 

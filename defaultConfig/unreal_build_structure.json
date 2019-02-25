@@ -34,7 +34,7 @@
          "build_flags":[
             "cook",
             "nocompileeditor",
-            "buerroild",
+            "build",
             "stage",
             "archive",
             "pak",

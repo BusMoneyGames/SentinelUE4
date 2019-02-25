@@ -92,6 +92,31 @@ class BaseUnrealBuilder:
             sys.exit(popen.returncode)
 
 
+class EditorComponentBuilder(BaseUnrealBuilder):
+
+    def __init__(self, run_config, component_name = "ShaderCompileWorker"):
+        self.component_name = component_name
+        super(EditorComponentBuilder, self).__init__(run_config, build_config_name="default")
+
+    def get_build_command(self):
+
+        unreal_build_tool_path = self.editor_util.get_unreal_build_tool_path()
+
+        cmd_list = [str(unreal_build_tool_path),
+                    # self.unreal_project_info.get_project_name(),
+                    "Development",  # The editor build is always development
+                    self.platform,
+                    self.component_name
+                    ]
+
+        cmd = " ".join(cmd_list)
+        L.debug("Build command: %s", cmd)
+
+        return cmd
+
+
+
+
 class UnrealEditorBuilder(BaseUnrealBuilder):
 
     """
@@ -135,6 +160,13 @@ class UnrealEditorBuilder(BaseUnrealBuilder):
         L.debug("Build command: %s", cmd)
 
         return cmd
+
+    def run(self):
+        # Editor Compile
+        super(UnrealEditorBuilder, self).run()
+
+        # Shader Compiler
+
 
 
 class UnrealClientBuilder(BaseUnrealBuilder):
@@ -227,6 +259,10 @@ class UnrealClientBuilder(BaseUnrealBuilder):
         if self.build_settings["should_compile"]:
             editor_builder = UnrealEditorBuilder(self.run_config)
             editor_builder.run()
+
+            # TODO Move this over to a config
+            EditorComponentBuilder(self.run_config, component_name="ShaderCompileWorker").run()
+            EditorComponentBuilder(self.run_config, component_name="UnrealLightmass").run()
 
         super(UnrealClientBuilder, self).run()
 
