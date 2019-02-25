@@ -40,7 +40,8 @@ def read_config(config_dir):
 
 
 def get_default_build_presets():
-    default_run_config = read_config("")
+    current_dir = pathlib.Path(pathlib.Path(__file__).parent)
+    default_run_config = read_config(current_dir)
     build_presets = dict(default_run_config[CONSTANTS.UNREAL_BUILD_SETTINGS_STRUCTURE])
 
     return "\n".join(build_presets.keys())
@@ -90,6 +91,7 @@ def main():
 
     # Construct the config file
     run_config = read_config(args.config_overwrite)
+
 
     if args.task.lower() in COMMANDS:
         if args.task.lower() == "build":
