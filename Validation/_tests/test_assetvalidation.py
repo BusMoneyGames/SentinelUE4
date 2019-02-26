@@ -1,5 +1,5 @@
 import unittest
-import _tests.helper as helper
+import helper as helper
 
 from Validation import assetvalidation
 

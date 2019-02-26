@@ -1,6 +1,6 @@
 import unittest
 import Editor.buildcommands as buildcommands
-import _tests.helper as helper
+import helper as helper
 
 import logging
 

@@ -1,7 +1,7 @@
 import unittest
 import logging
 import Editor.packageinspection as packageinspection
-import _tests.helper as helper
+import helper as helper
 
 L = logging.getLogger()
 

@@ -3,6 +3,8 @@ import json
 import pathlib
 import CONSTANTS
 import logging
+import helper
+
 from Editor import buildcommands, commandlets, packageinspection
 COMMANDS = ["build", "validate", "run"]
 
@@ -13,44 +15,17 @@ L = logging.getLogger()
 L.setLevel(logging.INFO)
 
 
-def read_config(config_dir):
-    config_dir = pathlib.Path(config_dir).resolve()
-
-    if not config_dir.exists():
-        print("Unable to find a run config directory at: %", str(config_dir))
-    else:
-        pass
-        # print("Reading Config from directory: ", str(config_dir))
-
-    run_config = {}
-
-    for each_file in config_dir.glob("**/*.json"):
-
-        f = open(str(each_file))
-        json_data = json.load(f)
-        f.close()
-
-        run_config.update(json_data)
-
-    relative_project_path = pathlib.Path(run_config[CONSTANTS.UNREAL_PROJECT_ROOT])
-    project_root = config_dir.joinpath(relative_project_path).resolve()
-    L.info("Found Project Root At: %s", project_root)
-
-    run_config[CONSTANTS.UNREAL_PROJECT_ROOT] = str(project_root)
-
-    return run_config
-
-
 def get_default_build_presets():
     current_dir = pathlib.Path(pathlib.Path(__file__).parent)
-    default_run_config = read_config(current_dir)
+    default_run_config = helper.read_config(current_dir)
     build_presets = dict(default_run_config[CONSTANTS.UNREAL_BUILD_SETTINGS_STRUCTURE])
 
     return "\n".join(build_presets.keys())
 
 
 def get_default_automation_tasks():
-    default_run_config = read_config("")
+    current_dir = pathlib.Path(pathlib.Path(__file__).parent)
+    default_run_config = helper.read_config(current_dir)
     commandlet_settings = dict(default_run_config[CONSTANTS.COMMANDLET_SETTINGS])
     automation_tasks = []
 
@@ -92,7 +67,7 @@ def main():
     args = parser.parse_args()
 
     # Construct the config file
-    run_config = read_config(args.config_overwrite)
+    run_config = helper.read_config(args.config_overwrite)
 
     if args.task.lower() in COMMANDS:
         if args.task.lower() == "build":

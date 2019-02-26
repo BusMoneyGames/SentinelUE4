@@ -1,8 +1,7 @@
 import unittest
 import Editor.commandlets as commandlets
-import pathlib
 import CONSTANTS
-import _tests.helper as helper
+import helper as helper
 
 import logging
 
