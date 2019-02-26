@@ -44,6 +44,8 @@ def main():
                                      add_help=True,
                                      formatter_class=argparse.RawTextHelpFormatter)
 
+    parser.add_argument("-d", help="Detailed Logging")
+
     build_tasks = parser.add_argument_group('Build Tools')
     build_tasks.add_argument("-build_preset", default="default",
                              help="\nall\n" + default_build_presets)
@@ -66,8 +68,12 @@ def main():
 
     args = parser.parse_args()
 
+    if args.d:
+        L.setLevel(logging.DEBUG)
+
     # Construct the config file
     run_config = helper.read_config(args.config_overwrite)
+    L.debug(run_config)
 
     if args.task.lower() in COMMANDS:
         if args.task.lower() == "build":
