@@ -8,6 +8,20 @@ import Editor.buildcommands as buildcommands
 L = logging.getLogger()
 
 
+def verify_environment(run_config):
+
+    env_config = run_config[CONSTANTS.ENVIRONMENT_CATEGORY]
+    print('\n')
+    print("%-75s %-25s %4s" % ("Path", "Value", "Exists"))
+
+    for each_env_config in env_config.keys():
+        path = pathlib.Path(env_config[each_env_config])
+        exists = path.exists()
+
+        print("%-75s %-25s %4s" % (path, each_env_config, str(exists)))
+
+    print('\n')
+
 def reset_ue_repo():
     """
     cleans the git repo so that it is clean to run
@@ -68,10 +82,6 @@ def read_config(config_dir):
 
     env_category[CONSTANTS.UNREAL_PROJECT_ROOT] = str(project_root)
     run_config[CONSTANTS.ENVIRONMENT_CATEGORY] = env_category
-
-    if L.level == logging.DEBUG:
-        import pprint
-        pprint.pprint(run_config)
 
     return run_config
 

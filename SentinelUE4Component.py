@@ -44,6 +44,7 @@ def main():
                                      formatter_class=argparse.RawTextHelpFormatter)
 
     parser.add_argument("-debug", action='store_true')
+    parser.add_argument("-verify", action='store_true')
 
     build_tasks = parser.add_argument_group('Build Tools')
     build_tasks.add_argument("-build_preset", default="default",
@@ -62,7 +63,6 @@ def main():
                         help="Overwrite the config folder path")
 
     parser.add_argument("-task",
-                        required=True,
                         help="runs a sentinel task")
 
     args = parser.parse_args()
@@ -72,6 +72,11 @@ def main():
 
     # Construct the config file
     run_config = helper.read_config(args.config_overwrite)
+
+    if args.verify:
+        helper.verify_environment(run_config)
+        import sys
+        sys.exit()
 
     if args.task.lower() in COMMANDS:
         if args.task.lower() == "build":
