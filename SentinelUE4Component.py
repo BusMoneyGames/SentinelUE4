@@ -44,7 +44,7 @@ def main():
                                      add_help=True,
                                      formatter_class=argparse.RawTextHelpFormatter)
 
-    parser.add_argument("-d", help="Detailed Logging")
+    parser.add_argument("-debug", action='store_true')
 
     build_tasks = parser.add_argument_group('Build Tools')
     build_tasks.add_argument("-build_preset", default="default",
