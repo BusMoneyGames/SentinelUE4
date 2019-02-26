@@ -68,7 +68,7 @@ def main():
 
     args = parser.parse_args()
 
-    if args.d:
+    if args.debug:
         L.setLevel(logging.DEBUG)
 
     # Construct the config file
