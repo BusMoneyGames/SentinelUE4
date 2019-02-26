@@ -2,7 +2,10 @@ import git
 import pathlib
 import CONSTANTS
 import json
+import logging
 import Editor.buildcommands as buildcommands
+
+L = logging.getLogger()
 
 
 def reset_ue_repo():
@@ -65,6 +68,10 @@ def read_config(config_dir):
 
     env_category[CONSTANTS.UNREAL_PROJECT_ROOT] = str(project_root)
     run_config[CONSTANTS.ENVIRONMENT_CATEGORY] = env_category
+
+    if L.level == logging.DEBUG:
+        import pprint
+        pprint.pprint(run_config)
 
     return run_config
 

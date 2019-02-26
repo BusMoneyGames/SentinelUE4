@@ -1,5 +1,4 @@
 import argparse
-import json
 import pathlib
 import CONSTANTS
 import logging
@@ -73,7 +72,6 @@ def main():
 
     # Construct the config file
     run_config = helper.read_config(args.config_overwrite)
-    L.debug(run_config)
 
     if args.task.lower() in COMMANDS:
         if args.task.lower() == "build":
