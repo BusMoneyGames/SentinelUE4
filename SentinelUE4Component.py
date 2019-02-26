@@ -34,6 +34,8 @@ def read_config(config_dir):
 
     relative_project_path = pathlib.Path(run_config[CONSTANTS.UNREAL_PROJECT_ROOT])
     project_root = config_dir.joinpath(relative_project_path).resolve()
+    L.info("Found Project Root At: %s", project_root)
+
     run_config[CONSTANTS.UNREAL_PROJECT_ROOT] = str(project_root)
 
     return run_config
@@ -91,7 +93,6 @@ def main():
 
     # Construct the config file
     run_config = read_config(args.config_overwrite)
-
 
     if args.task.lower() in COMMANDS:
         if args.task.lower() == "build":
