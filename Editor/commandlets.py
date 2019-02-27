@@ -122,9 +122,6 @@ class BaseUE4Commandlet:
 
         L.info("Running commandlet: %s", commandlet_command)
 
-        # Not sure why the info doesn't work
-        print(commandlet_command)
-
         temp_dump_file = os.path.join(self.raw_log_path, self.log_file_name)
 
         if not os.path.exists(os.path.dirname(temp_dump_file)):

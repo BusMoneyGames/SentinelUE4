@@ -59,7 +59,7 @@ def run_startup_test(path_obj):
             test_name_flag += " -" + " -".join(extra_settings["extra_startup_flags"])
 
         cmd = exe_path + " " + level + " -" + test_name_flag
-        L.info(cmd)
+        L.debug(cmd)
         subprocess.run(cmd)
 
         saved_folder = game_paths.get_saved_folder_path()

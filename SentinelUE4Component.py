@@ -3,6 +3,7 @@ import pathlib
 import CONSTANTS
 import logging
 import helper
+import sys
 
 from Editor import buildcommands, commandlets, packageinspection
 COMMANDS = ["build", "validate", "run"]
@@ -56,7 +57,8 @@ def main():
 
     # Validation settings
     validate_settings = parser.add_argument_group('Validation Settings')
-    validate_settings.add_argument('-validate_preset', nargs='*', default=[])
+    validate_settings.add_argument('-validation_tasks', nargs='*', default=[])
+    validate_settings.add_argument('-validation_inspect', action='store_true')
 
     # Run Settings
     run_settings = parser.add_argument_group('Run Settings')
@@ -91,10 +93,16 @@ def main():
             builder.run()
 
     if args.validate:
-        L.debug("Available Validation Steps: %s", "".join(get_default_automation_tasks()))
-        L.info("Running: %s validation steps", len(args.validate_preset))
 
-        for each_validation_config in args.validate_preset:
+        if args.validation_inspect:
+            L.info('Running Full Validation Export')
+            packageinspection.BasePackageInspection(run_config).run()
+
+        if args.validation_tasks:
+            L.debug("Available Validation Steps: %s", "".join(get_default_automation_tasks()))
+            L.info("Running: %s validation steps", len(args.validate_preset))
+
+        for each_validation_config in args.validation_tasks:
             L.info("Starting: %s", each_validation_config)
             commandlet = commandlets.BaseUE4Commandlet(run_config, each_validation_config)
             commandlet.run()

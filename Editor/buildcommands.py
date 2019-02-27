@@ -70,7 +70,7 @@ class BaseUnrealBuilder:
         if not path.parent.exists():
             os.makedirs(path.parent)
 
-        print(cmd)
+        L.debug(cmd)
 
         popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
