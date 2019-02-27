@@ -62,14 +62,13 @@ class UEUtilities:
         return files
 
     def get_project_file_path(self):
+
         path = pathlib.Path(self.environment_structure[CONSTANTS.UNREAL_PROJECT_ROOT])
         print(path)
         for e in path.glob("**/*.uproject"):
             return e
 
         raise FileNotFoundError
-
-
 
 
 def clean_unreal_project(project_root_folder):

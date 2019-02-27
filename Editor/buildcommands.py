@@ -115,8 +115,6 @@ class EditorComponentBuilder(BaseUnrealBuilder):
         return cmd
 
 
-
-
 class UnrealEditorBuilder(BaseUnrealBuilder):
 
     """
@@ -164,8 +162,6 @@ class UnrealEditorBuilder(BaseUnrealBuilder):
     def run(self):
         # Editor Compile
         super(UnrealEditorBuilder, self).run()
-
-        # Shader Compiler
 
 
 

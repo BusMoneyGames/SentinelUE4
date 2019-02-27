@@ -45,27 +45,21 @@ def main():
 
     parser.add_argument("-debug", action='store_true')
     parser.add_argument("-verify", action='store_true')
+    parser.add_argument("-task", default="default", help="runs a sentinel task")
+    parser.add_argument("-config_overwrite", default="", help="Overwrite the config folder path")
 
     build_tasks = parser.add_argument_group('Build Tools')
     build_tasks.add_argument("-build_preset", default="default",
                              help="\nall\n" + default_build_presets)
 
     validate_tasks = parser.add_argument_group('Project Validation')
-
     validate_tasks.add_argument("-automation_task", default="",
                                 help=default_validation_tasks)
 
-    validate_tasks.add_argument("-inspect", "--package_inspection", action='store_true',
-                                help="True/False")
-
-    parser.add_argument("-config_overwrite",
-                        default="",
-                        help="Overwrite the config folder path")
-
-    parser.add_argument("-task",
-                        help="runs a sentinel task")
+    validate_tasks.add_argument("-inspect", "--package_inspection", action='store_true')
 
     args = parser.parse_args()
+    print(args)
 
     if args.debug:
         L.setLevel(logging.DEBUG)
