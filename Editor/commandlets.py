@@ -183,7 +183,6 @@ class PackageInfoCommandlet(BaseUE4Commandlet):
     """ Runs the package info commandlet """
     def __init__(self, run_config, unreal_asset_file_paths, asset_type="Default"):
         """
-
         :param unreal_project_info:
         :param unreal_asset_file_path:  Absolute path to the unreal engine asset file
         :param each_chunk_hash:  list of package file hashes for archiving
@@ -221,10 +220,11 @@ class PackageInfoCommandlet(BaseUE4Commandlet):
         """
 
         commandlet_command = self.get_command()
-        print(commandlet_command)
+
+        L.debug(commandlet_command)
 
         temp_dump_file = os.path.join(self.raw_log_path, "temp", "_tempDump.log")
-        print(temp_dump_file)
+        L.debug(temp_dump_file)
 
         if not os.path.exists(os.path.dirname(temp_dump_file)):
             os.makedirs(os.path.dirname(temp_dump_file))

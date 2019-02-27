@@ -36,30 +36,33 @@ def get_default_automation_tasks():
 
 
 def main():
-    default_build_presets = get_default_build_presets()
-    default_validation_tasks = get_default_automation_tasks()
-
     parser = argparse.ArgumentParser(description='Runs sentinel tasks for Unreal Engine.',
                                      add_help=True,
                                      formatter_class=argparse.RawTextHelpFormatter)
 
-    parser.add_argument("-debug", action='store_true')
-    parser.add_argument("-verify", action='store_true')
-    parser.add_argument("-task", default="default", help="runs a sentinel task")
-    parser.add_argument("-config_overwrite", default="", help="Overwrite the config folder path")
+    parser.add_argument("-build", action='store_true')
+    parser.add_argument("-validate", action='store_true')
+    parser.add_argument("-run", action='store_true')
 
-    build_tasks = parser.add_argument_group('Build Tools')
-    build_tasks.add_argument("-build_preset", default="default",
-                             help="\nall\n" + default_build_presets)
+    global_settings = parser.add_argument_group('Global Settings')
+    global_settings.add_argument("-debug", action='store_true', help="Enables detailed logging")
+    global_settings.add_argument("-verify", action='store_true', help="Verifies the paths in the environment")
+    global_settings.add_argument("-deploy", action='store_true', help="Uploads the artifacts to the server")
+    global_settings.add_argument("-config_overwrite", default="", help="Config root directory if different that default")
 
-    validate_tasks = parser.add_argument_group('Project Validation')
-    validate_tasks.add_argument("-automation_task", default="",
-                                help=default_validation_tasks)
+    # Build settings
+    build_tasks = parser.add_argument_group('Build Settings')
+    build_tasks.add_argument('-build_preset', nargs='*', default=[])
 
-    validate_tasks.add_argument("-inspect", "--package_inspection", action='store_true')
+    # Validation settings
+    validate_settings = parser.add_argument_group('Validation Settings')
+    validate_settings.add_argument('-validate_preset', nargs='*', default=[])
+
+    # Run Settings
+    run_settings = parser.add_argument_group('Run Settings')
+    run_settings.add_argument('-run_tasks', nargs='*')
 
     args = parser.parse_args()
-    print(args)
 
     if args.debug:
         L.setLevel(logging.DEBUG)
@@ -72,25 +75,32 @@ def main():
         import sys
         sys.exit()
 
-    if args.task.lower() in COMMANDS:
-        if args.task.lower() == "build":
-            builder = buildcommands.UnrealClientBuilder(run_config=run_config,
-                                                        build_config_name=args.build_preset
-                                                        )
+    if args.build:
+        L.debug("Available Builds: %s", "".join(get_default_build_presets()))
 
+        if len(args.build_preset) == 0:
+            L.info("No Build preset specified,  running with default")
+            args.build_preset = ["default"]
+
+        L.info("Running: %s builds", len(args.build_preset))
+        for each_config in args.build_preset:
+            L.info("Starting: %s", each_config)
+            builder = buildcommands.UnrealClientBuilder(run_config=run_config,
+                                                        build_config_name=each_config
+                                                        )
             builder.run()
 
-        if args.task.lower() == "validate" and args.automation_task:
-            commandlet = commandlets.BaseUE4Commandlet(run_config, args.automation_task)
+    if args.validate:
+        L.debug("Available Validation Steps: %s", "".join(get_default_automation_tasks()))
+        L.info("Running: %s validation steps", len(args.validate_preset))
+
+        for each_validation_config in args.validate_preset:
+            L.info("Starting: %s", each_validation_config)
+            commandlet = commandlets.BaseUE4Commandlet(run_config, each_validation_config)
             commandlet.run()
 
-        if args.task.lower() == "validate" and args.package_inspection:
-            inspection_obj = packageinspection.ProcessPackageInfo(run_config)
-            inspection_obj.run()
-
-    else:
-        print(args.task + " " + "is not a valid task...")
-        print("Available Commands: \n\n" + "\n".join(COMMANDS) + "\n")
+    if args.run:
+        pass
 
 
 if __name__ == "__main__":
