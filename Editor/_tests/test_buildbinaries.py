@@ -1,6 +1,7 @@
 import unittest
 import Editor.buildcommands as buildcommands
-import helper as helper
+import _tests.helper
+from SentinelConfig import configelper as helper
 
 import logging
 
@@ -14,7 +15,7 @@ L.setLevel(logging.DEBUG)
 class TestClientBuilder(unittest.TestCase):
 
     def setUp(self):
-        helper.clean_compile_project()
+        _tests.helper.clean_compile_project()
         path_config = helper.get_path_config_for_test()
 
         self.client_builder = buildcommands.UnrealClientBuilder(path_config)
@@ -39,7 +40,7 @@ class TestClientBuilder(unittest.TestCase):
 class TestEditorBuilder(unittest.TestCase):
 
     def setUp(self):
-        helper.clean_compile_project()
+        _tests.helper.clean_compile_project()
         path_config = helper.get_path_config_for_test()
         self.editor_builder = buildcommands.UnrealEditorBuilder(path_config)
 

@@ -1,7 +1,8 @@
 import unittest
 import Editor.commandlets as commandlets
 import CONSTANTS
-import helper as helper
+import _tests.helper
+from SentinelConfig import configelper as helper
 
 import logging
 
@@ -15,7 +16,7 @@ L.setLevel(logging.DEBUG)
 class TestDefaultCommandlets(unittest.TestCase):
 
     def setUp(self):
-        helper.clean_compile_project()
+        _tests.helper.clean_compile_project()
         L.debug("Iterates through all the default commandlets and runs them")
         self.run_config = helper.get_path_config_for_test()
         self.commandlets = dict(self.run_config[CONSTANTS.COMMANDLET_SETTINGS])

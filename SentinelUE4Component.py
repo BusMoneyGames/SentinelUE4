@@ -2,8 +2,7 @@ import argparse
 import pathlib
 import CONSTANTS
 import logging
-import helper
-import sys
+from SentinelConfig import configelper
 
 from Editor import buildcommands, commandlets, packageinspection
 COMMANDS = ["build", "validate", "run"]
@@ -17,7 +16,7 @@ L.setLevel(logging.INFO)
 
 def get_default_build_presets():
     current_dir = pathlib.Path(pathlib.Path(__file__).parent)
-    default_run_config = helper.read_config(current_dir)
+    default_run_config = configelper.read_config(current_dir)
     build_presets = dict(default_run_config[CONSTANTS.UNREAL_BUILD_SETTINGS_STRUCTURE])
 
     return "\n".join(build_presets.keys())
@@ -25,7 +24,7 @@ def get_default_build_presets():
 
 def get_default_automation_tasks():
     current_dir = pathlib.Path(pathlib.Path(__file__).parent)
-    default_run_config = helper.read_config(current_dir)
+    default_run_config = configelper.read_config(current_dir)
     commandlet_settings = dict(default_run_config[CONSTANTS.COMMANDLET_SETTINGS])
     automation_tasks = []
 
@@ -70,10 +69,10 @@ def main():
         L.setLevel(logging.DEBUG)
 
     # Construct the config file
-    run_config = helper.read_config(args.config_overwrite)
+    run_config = configelper.read_config(args.config_overwrite)
 
     if args.verify:
-        helper.verify_environment(run_config)
+        configelper.verify_environment(run_config)
         import sys
         sys.exit()
 

@@ -1,5 +1,5 @@
 import unittest
-import helper as helper
+from SentinelConfig import configelper as helper
 
 from Validation import assetvalidation
 

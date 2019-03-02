@@ -1,7 +1,8 @@
 import unittest
 import logging
 import Editor.packageinspection as packageinspection
-import helper as helper
+import _tests.helper
+from SentinelConfig import configelper as helper
 
 L = logging.getLogger()
 
@@ -13,7 +14,7 @@ class TestInspectPackages(unittest.TestCase):
         L.setLevel(logging.DEBUG)
 
         if self.is_first_run:
-            helper.clean_compile_project()
+            _tests.helper.clean_compile_project()
             self.is_first_run = False
 
         run_config = helper.get_path_config_for_test()
