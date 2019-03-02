@@ -1,6 +1,6 @@
 # coding=utf-8
 import os
-import CONSTANTS
+from SentinelConfig import CONSTANTS
 import logging
 
 L = logging.getLogger(__name__)

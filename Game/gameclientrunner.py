@@ -3,8 +3,6 @@ import subprocess
 import os
 import sys
 
-import CONSTANTS
-
 
 class ClientRunner:
     """Handles running game clients"""

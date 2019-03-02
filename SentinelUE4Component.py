@@ -1,8 +1,7 @@
 import argparse
 import pathlib
-import CONSTANTS
 import logging
-from SentinelConfig import configelper
+from SentinelConfig import configelper, CONSTANTS
 
 from Editor import buildcommands, commandlets, packageinspection
 COMMANDS = ["build", "validate", "run"]

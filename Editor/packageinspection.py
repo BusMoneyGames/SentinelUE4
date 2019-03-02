@@ -6,7 +6,7 @@ import os
 import pathlib
 import shutil
 
-import CONSTANTS
+from SentinelConfig import CONSTANTS
 from Editor import commandlets, editorutilities
 from Editor.LogProcesser import packageinfolog
 
@@ -188,9 +188,12 @@ class BasePackageInspection:
         """Makes the paths for outputs inside of the root artifact folder"""
 
         self.sentinel_root = self.environment_config[CONSTANTS.SENTINEL_ARTIFACTS_ROOT_PATH]
-        self.archive_folder_path = self.sentinel_root.joinpath(self.sentinel_structure[CONSTANTS.SENTINEL_CACHE_ROOT]).resolve()
-        self.raw_data_dir = self.sentinel_root.joinpath(self.sentinel_structure[CONSTANTS.SENTINEL_RAW_LOGS_PATH]).resolve()
-        self.processed_path = self.sentinel_root.joinpath(self.sentinel_structure[CONSTANTS.SENTINEL_PROCESSED_PATH]).resolve()
+        self.archive_folder_path = self.sentinel_root.joinpath(self.sentinel_structure[
+                                                                   CONSTANTS.SENTINEL_CACHE_ROOT]).resolve()
+        self.raw_data_dir = self.sentinel_root.joinpath(self.sentinel_structure[
+                                                            CONSTANTS.SENTINEL_RAW_LOGS_PATH]).resolve()
+        self.processed_path = self.sentinel_root.joinpath(self.sentinel_structure[
+                                                              CONSTANTS.SENTINEL_PROCESSED_PATH]).resolve()
 
         if not self.archive_folder_path.exists():
             os.makedirs(self.archive_folder_path)
@@ -485,9 +488,12 @@ class ProcessPackageInfo:
         """Makes the paths for outputs inside of the root artifact folder"""
 
         self.sentinel_root = self.environment_config[CONSTANTS.SENTINEL_ARTIFACTS_ROOT_PATH]
-        self.archive_folder_path = self.sentinel_root.joinpath(self.sentinel_structure[CONSTANTS.SENTINEL_CACHE_ROOT]).resolve()
-        self.raw_data_dir = self.sentinel_root.joinpath(self.sentinel_structure[CONSTANTS.SENTINEL_RAW_LOGS_PATH]).resolve()
-        self.processed_path = self.sentinel_root.joinpath(self.sentinel_structure[CONSTANTS.SENTINEL_PROCESSED_PATH]).resolve()
+        self.archive_folder_path = self.sentinel_root.joinpath(self.sentinel_structure[
+                                                                   CONSTANTS.SENTINEL_CACHE_ROOT]).resolve()
+        self.raw_data_dir = self.sentinel_root.joinpath(self.sentinel_structure[
+                                                            CONSTANTS.SENTINEL_RAW_LOGS_PATH]).resolve()
+        self.processed_path = self.sentinel_root.joinpath(self.sentinel_structure[
+                                                              CONSTANTS.SENTINEL_PROCESSED_PATH]).resolve()
 
         if not self.archive_folder_path.exists():
             os.makedirs(self.archive_folder_path)

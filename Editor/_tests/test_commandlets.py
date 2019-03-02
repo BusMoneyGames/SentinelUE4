@@ -1,8 +1,7 @@
 import unittest
 import Editor.commandlets as commandlets
-import CONSTANTS
 import _tests.helper
-from SentinelConfig import configelper as helper
+from SentinelConfig import configelper as helper, CONSTANTS
 
 import logging
 

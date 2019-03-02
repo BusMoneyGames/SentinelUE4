@@ -1,7 +1,7 @@
 # coding=utf-8
 import os
 import pathlib
-import CONSTANTS
+from SentinelConfig import CONSTANTS
 import logging
 
 

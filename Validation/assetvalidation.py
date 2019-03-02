@@ -1,5 +1,5 @@
 import pathlib
-import CONSTANTS
+from SentinelConfig import CONSTANTS
 
 
 class Validate:

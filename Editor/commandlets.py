@@ -6,7 +6,7 @@ import logging
 import pathlib
 import io
 
-import CONSTANTS
+from SentinelConfig import CONSTANTS
 import Editor.editorutilities as editorUtilities
 
 L = logging.getLogger(__name__)
@@ -45,7 +45,8 @@ class BaseUE4Commandlet:
         L.debug("Project Root Path: %s", self.project_root_path)
         self.engine_root_path = pathlib.Path(self.environment_config[CONSTANTS.ENGINE_ROOT_PATH]).resolve()
 
-        self.raw_log_path = self.project_root_path.joinpath(self.environment_config[CONSTANTS.SENTINEL_ARTIFACTS_ROOT_PATH])
+        self.raw_log_path = self.project_root_path.joinpath(self.environment_config[
+                                                                CONSTANTS.SENTINEL_ARTIFACTS_ROOT_PATH])
         self.raw_log_path = self.raw_log_path.resolve()
 
         # Information about the relative structure of ue4

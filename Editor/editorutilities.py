@@ -1,6 +1,6 @@
 import shutil
 
-import CONSTANTS
+from SentinelConfig import CONSTANTS
 import sys
 import pathlib
 
@@ -32,7 +32,8 @@ class UEUtilities:
 
     def get_unreal_build_tool_path(self):
 
-        engine_root_folder = self.project_root_path.joinpath(self.environment_structure[CONSTANTS.ENGINE_ROOT_PATH]).resolve()
+        engine_root_folder = self.project_root_path.joinpath(self.environment_structure[
+                                                                 CONSTANTS.ENGINE_ROOT_PATH]).resolve()
 
         engine_root_folder = engine_root_folder.joinpath("Engine")
 
