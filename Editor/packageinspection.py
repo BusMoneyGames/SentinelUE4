@@ -6,7 +6,7 @@ import os
 import pathlib
 import shutil
 
-from SentinelConfig import CONSTANTS
+import CONSTANTS
 from Editor import commandlets, editorutilities
 from Editor.LogProcesser import packageinfolog
 

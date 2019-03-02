@@ -6,7 +6,7 @@ import logging
 import pathlib
 import io
 
-from SentinelConfig import CONSTANTS
+import CONSTANTS
 import Editor.editorutilities as editorUtilities
 
 L = logging.getLogger(__name__)

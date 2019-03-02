@@ -1,6 +1,6 @@
 import shutil
 
-from SentinelConfig import CONSTANTS
+import CONSTANTS
 import sys
 import pathlib
 

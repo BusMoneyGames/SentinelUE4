@@ -2,7 +2,7 @@
 import subprocess
 import os
 import logging
-from SentinelConfig import CONSTANTS
+import CONSTANTS
 import pathlib
 import Editor.editorutilities as editorUtilities
 L = logging.getLogger(__name__)
