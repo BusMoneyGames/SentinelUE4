@@ -3,6 +3,7 @@ import pathlib
 import json
 import logging
 import CONSTANTS
+import sys
 
 from Editor import buildcommands, commandlets, packageinspection
 COMMANDS = ["build", "validate", "run"]
@@ -54,6 +55,7 @@ def get_default_automation_tasks(default_run_config):
 
 
 def main(raw_args=None):
+
     parser = argparse.ArgumentParser(description='Runs sentinel tasks for Unreal Engine.',
                                      add_help=True,
                                      formatter_class=argparse.RawTextHelpFormatter)
@@ -66,7 +68,7 @@ def main(raw_args=None):
     global_settings.add_argument("-config", default="", help="Absolute or relative path to"
                                                              " the config directory if other than default")
     global_settings.add_argument("-debug", action='store_true', help="Enables detailed logging")
-    global_settings.add_argument("-verify", action='store_true', help="Verifies the paths in the environment")
+    global_settings.add_argument("-detailed_help", action='store_true')
     global_settings.add_argument("-deploy", action='store_true', help="Uploads the artifacts to the server")
 
     # Build settings
@@ -90,12 +92,9 @@ def main(raw_args=None):
     # Construct the config file
     run_config = _read_config(args.config)
 
-    """
-    if args.verify:
-        configelper.verify_environment(run_config)
-        import sys
-        sys.exit()
-    """
+    if args.detailed_help:
+        L.info("Showing detailed help")
+        return
 
     if args.build:
         L.debug("Available Builds: %s", "".join(get_default_build_presets(run_config)))
