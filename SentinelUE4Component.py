@@ -1,7 +1,8 @@
 import argparse
 import pathlib
+import json
 import logging
-from SentinelConfig import configelper, CONSTANTS
+import CONSTANTS
 
 from Editor import buildcommands, commandlets, packageinspection
 COMMANDS = ["build", "validate", "run"]
@@ -13,17 +14,35 @@ L = logging.getLogger()
 L.setLevel(logging.INFO)
 
 
-def get_default_build_presets():
-    current_dir = pathlib.Path(pathlib.Path(__file__).parent)
-    default_run_config = configelper.read_config(current_dir)
+def _read_config(assembled_config_path):
+    """
+    Reads the assembled config
+
+    :param assembled_config_path:
+    :return:
+    """
+
+    f = open(assembled_config_path, "r")
+    config = json.load(f)
+    f.close()
+
+    return config
+
+
+def get_default_build_presets(default_run_config):
+    # current_dir = pathlib.Path(pathlib.Path(__file__).parent)
+    # default_run_config = configelper.read_config(current_dir)
+
     build_presets = dict(default_run_config[CONSTANTS.UNREAL_BUILD_SETTINGS_STRUCTURE])
 
     return "\n".join(build_presets.keys())
 
 
-def get_default_automation_tasks():
-    current_dir = pathlib.Path(pathlib.Path(__file__).parent)
-    default_run_config = configelper.read_config(current_dir)
+def get_default_automation_tasks(default_run_config):
+
+    # current_dir = pathlib.Path(pathlib.Path(__file__).parent)
+    # default_run_config = configelper.read_config(current_dir)
+
     commandlet_settings = dict(default_run_config[CONSTANTS.COMMANDLET_SETTINGS])
     automation_tasks = []
 
@@ -34,7 +53,7 @@ def get_default_automation_tasks():
     return "\n".join(automation_tasks)
 
 
-def main():
+def main(raw_args=None):
     parser = argparse.ArgumentParser(description='Runs sentinel tasks for Unreal Engine.',
                                      add_help=True,
                                      formatter_class=argparse.RawTextHelpFormatter)
@@ -44,10 +63,11 @@ def main():
     parser.add_argument("-run", action='store_true')
 
     global_settings = parser.add_argument_group('Global Settings')
+    global_settings.add_argument("-config", default="", help="Absolute or relative path to"
+                                                             " the config directory if other than default")
     global_settings.add_argument("-debug", action='store_true', help="Enables detailed logging")
     global_settings.add_argument("-verify", action='store_true', help="Verifies the paths in the environment")
     global_settings.add_argument("-deploy", action='store_true', help="Uploads the artifacts to the server")
-    global_settings.add_argument("-config_overwrite", default="", help="Config root directory if different that default")
 
     # Build settings
     build_tasks = parser.add_argument_group('Build Settings')
@@ -62,21 +82,23 @@ def main():
     run_settings = parser.add_argument_group('Run Settings')
     run_settings.add_argument('-run_tasks', nargs='*')
 
-    args = parser.parse_args()
+    args = parser.parse_args(raw_args)
 
     if args.debug:
         L.setLevel(logging.DEBUG)
 
     # Construct the config file
-    run_config = configelper.read_config(args.config_overwrite)
+    run_config = _read_config(args.config)
 
+    """
     if args.verify:
         configelper.verify_environment(run_config)
         import sys
         sys.exit()
+    """
 
     if args.build:
-        L.debug("Available Builds: %s", "".join(get_default_build_presets()))
+        L.debug("Available Builds: %s", "".join(get_default_build_presets(run_config)))
 
         if len(args.build_preset) == 0:
             L.info("No Build preset specified,  running with default")
@@ -97,7 +119,7 @@ def main():
             packageinspection.BasePackageInspection(run_config).run()
 
         if args.validation_tasks:
-            L.debug("Available Validation Steps: %s", "".join(get_default_automation_tasks()))
+            L.debug("Available Validation Steps: %s", "".join(get_default_automation_tasks(run_config)))
             L.info("Running: %s validation steps", len(args.validate_preset))
 
         for each_validation_config in args.validation_tasks:

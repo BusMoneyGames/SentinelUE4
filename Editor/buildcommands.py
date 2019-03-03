@@ -94,7 +94,7 @@ class BaseUnrealBuilder:
 
 class EditorComponentBuilder(BaseUnrealBuilder):
 
-    def __init__(self, run_config, component_name = "ShaderCompileWorker"):
+    def __init__(self, run_config, component_name="ShaderCompileWorker"):
         self.component_name = component_name
         super(EditorComponentBuilder, self).__init__(run_config, build_config_name="default")
 

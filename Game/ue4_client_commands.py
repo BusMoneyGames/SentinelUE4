@@ -1,5 +1,5 @@
 # coding=utf-8
-from SentinelConfig import CONSTANTS
+import CONSTANTS
 import os
 import subprocess
 import shutil
