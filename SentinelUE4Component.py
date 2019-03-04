@@ -64,7 +64,7 @@ def main(raw_args=None):
     parser.add_argument("-run", action='store_true')
 
     global_settings = parser.add_argument_group('Global Settings')
-    global_settings.add_argument("-config", default="", help="Absolute or relative path to"
+    global_settings.add_argument("-config", default="../", help="Absolute or relative path to"
                                                              " the config directory if other than default")
     global_settings.add_argument("-debug", action='store_true', help="Enables detailed logging")
     global_settings.add_argument("-detailed_help", action='store_true')
