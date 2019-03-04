@@ -23,9 +23,9 @@ def _read_config(assembled_config_path):
     :return:
     """
 
-    assembled_config_path = pathlib.Path(assembled_config_path).joinpath("_sentinelConfig.json")
+    assembled_config_path = pathlib.Path(assembled_config_path).joinpath("_sentinelConfig.json").resolve()
 
-    f = open(assembled_config_path, "r")
+    f = open(assembled_config_path.resolve(), "r")
     config = json.load(f)
     f.close()
 
@@ -67,7 +67,7 @@ def main(raw_args=None):
     parser.add_argument("-run", action='store_true')
 
     global_settings = parser.add_argument_group('Global Settings')
-    global_settings.add_argument("-config", default="../", help="Absolute or relative path to"
+    global_settings.add_argument("-config", default="", help="Absolute or relative path to"
                                                              " the config directory if other than default")
     global_settings.add_argument("-debug", action='store_true', help="Enables detailed logging")
     global_settings.add_argument("-detailed_help", action='store_true')
