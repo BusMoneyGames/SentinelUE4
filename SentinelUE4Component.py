@@ -1,9 +1,8 @@
 import argparse
-import pathlib
 import json
 import logging
 import CONSTANTS
-import sys
+
 
 from Editor import buildcommands, commandlets, packageinspection
 COMMANDS = ["build", "validate", "run"]
