@@ -1,4 +1,5 @@
 import argparse
+import pathlib
 import json
 import logging
 import CONSTANTS
@@ -21,6 +22,8 @@ def _read_config(assembled_config_path):
     :param assembled_config_path:
     :return:
     """
+
+    assembled_config_path = pathlib.Path(assembled_config_path).joinpath("_sentinelConfig.json")
 
     f = open(assembled_config_path, "r")
     config = json.load(f)
