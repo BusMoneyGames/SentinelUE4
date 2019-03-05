@@ -23,7 +23,10 @@ def _read_config(assembled_config_path):
     :return:
     """
 
-    f = open(assembled_config_path, "r")
+    path = pathlib.Path(assembled_config_path).joinpath("_sentinelConfig.json").resolve()
+    L.info(path)
+
+    f = open(path, "r")
     config = json.load(f)
     f.close()
 
