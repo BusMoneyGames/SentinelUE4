@@ -1,7 +1,9 @@
 import argparse
+import pathlib
 import json
 import logging
 import CONSTANTS
+import sys
 
 from Editor import buildcommands, commandlets, packageinspection
 COMMANDS = ["build", "validate", "run"]
@@ -29,6 +31,8 @@ def _read_config(assembled_config_path):
 
 
 def get_default_build_presets(default_run_config):
+    # current_dir = pathlib.Path(pathlib.Path(__file__).parent)
+    # default_run_config = configelper.read_config(current_dir)
 
     build_presets = dict(default_run_config[CONSTANTS.UNREAL_BUILD_SETTINGS_STRUCTURE])
 
@@ -36,6 +40,9 @@ def get_default_build_presets(default_run_config):
 
 
 def get_default_automation_tasks(default_run_config):
+
+    # current_dir = pathlib.Path(pathlib.Path(__file__).parent)
+    # default_run_config = configelper.read_config(current_dir)
 
     commandlet_settings = dict(default_run_config[CONSTANTS.COMMANDLET_SETTINGS])
     automation_tasks = []
@@ -83,7 +90,6 @@ def main(raw_args=None):
         L.setLevel(logging.DEBUG)
 
     # Construct the config file
-
     run_config = _read_config(args.config)
 
     if args.detailed_help:
