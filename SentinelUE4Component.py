@@ -3,7 +3,6 @@ import pathlib
 import json
 import logging
 import CONSTANTS
-import sys
 
 from Editor import buildcommands, commandlets, packageinspection
 COMMANDS = ["build", "validate", "run"]
@@ -24,7 +23,9 @@ def _read_config(assembled_config_path):
     """
 
     path = pathlib.Path(assembled_config_path).joinpath("_sentinelConfig.json").resolve()
+
     L.info(path)
+    L.debug("Assembled Config Exists: " + str(path.exists()))
 
     f = open(path, "r")
     config = json.load(f)
@@ -93,6 +94,8 @@ def main(raw_args=None):
         L.setLevel(logging.DEBUG)
 
     # Construct the config file
+    L.info("Reading Config From: %s", args.config)
+
     run_config = _read_config(args.config)
 
     if args.detailed_help:
