@@ -170,7 +170,6 @@ class UnrealEditorBuilder(BaseUnrealBuilder):
         super(UnrealEditorBuilder, self).run()
 
 
-
 class UnrealClientBuilder(BaseUnrealBuilder):
     """
     Handles making client builds of the game project that can be either archived for testing or deployed to the

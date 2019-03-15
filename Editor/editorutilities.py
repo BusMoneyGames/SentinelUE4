@@ -3,7 +3,9 @@ import shutil
 import CONSTANTS
 import sys
 import pathlib
+import logging
 
+L = logging.getLogger(__name__)
 
 class UEUtilities:
 
@@ -51,21 +53,26 @@ class UEUtilities:
             sys.exit(1)
 
     def get_all_content_files(self):
-        content_value = self.run_config[CONSTANTS.UNREAL_PROJECT_STRUCTURE][CONSTANTS.UNREAL_CONTENT_ROOT_PATH]
-        project_root = pathlib.Path(self.environment_structure[CONSTANTS.UNREAL_PROJECT_ROOT]).resolve()
 
-        content_path = project_root.joinpath(content_value).resolve()
+        content_relative_path = self.run_config[CONSTANTS.UNREAL_PROJECT_STRUCTURE][CONSTANTS.UNREAL_CONTENT_ROOT_PATH]
+        unreal_project_root = self.get_project_file_path().parent
 
+        L.debug("Unreal Project Root: %s ", unreal_project_root)
+
+        content_path = unreal_project_root.joinpath(content_relative_path).resolve()
+
+        L.debug("Content Root Path: %s", content_path)
         files = []
         for i, each_file in enumerate(content_path.glob("**/*.uasset")):
             files.append(each_file)
+            L.debug("Found: %s", each_file)
 
         return files
 
     def get_project_file_path(self):
 
         path = pathlib.Path(self.environment_structure[CONSTANTS.UNREAL_PROJECT_ROOT])
-        print(path)
+
         for e in path.glob("**/*.uproject"):
             return e
 

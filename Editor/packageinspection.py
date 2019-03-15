@@ -178,7 +178,7 @@ class RawAssetUtilities:
 class BasePackageInspection:
 
     def __init__(self, run_config):
-
+        L.info("Starting Package Inspection")
         self.run_config = run_config
         self.environment_config = run_config[CONSTANTS.ENVIRONMENT_CATEGORY]
         self.sentinel_structure = run_config[CONSTANTS.SENTINEL_PROJECT_STRUCTURE]
@@ -196,6 +196,7 @@ class BasePackageInspection:
         """Makes the paths for outputs inside of the root artifact folder"""
 
         self.sentinel_root = pathlib.Path(self.environment_config[CONSTANTS.SENTINEL_ARTIFACTS_ROOT_PATH])
+        L.debug("Sentinel Root: %s ", self.sentinel_root)
 
         self.archive_folder_path = self.sentinel_root.joinpath(self.sentinel_structure[
                                                                    CONSTANTS.SENTINEL_CACHE_ROOT]).resolve()
