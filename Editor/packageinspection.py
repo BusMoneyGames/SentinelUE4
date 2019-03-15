@@ -7,8 +7,16 @@ import pathlib
 import shutil
 
 import CONSTANTS
-from Editor import commandlets, editorutilities
-from Editor.LogProcesser import packageinfolog
+
+print(__package__)
+if __package__ is None or __package__ == '':
+    import commandlets, editorutilities, LogProcesser
+else:
+    from . import commandlets, editorutilities, LogProcesser
+
+
+# from Editor import commandlets, editorutilities
+# from Editor.LogProcesser import packageinfolog
 
 L = logging.getLogger(__name__)
 
@@ -187,7 +195,8 @@ class BasePackageInspection:
     def _construct_paths(self):
         """Makes the paths for outputs inside of the root artifact folder"""
 
-        self.sentinel_root = self.environment_config[CONSTANTS.SENTINEL_ARTIFACTS_ROOT_PATH]
+        self.sentinel_root = pathlib.Path(self.environment_config[CONSTANTS.SENTINEL_ARTIFACTS_ROOT_PATH])
+
         self.archive_folder_path = self.sentinel_root.joinpath(self.sentinel_structure[
                                                                    CONSTANTS.SENTINEL_CACHE_ROOT]).resolve()
         self.raw_data_dir = self.sentinel_root.joinpath(self.sentinel_structure[
@@ -201,7 +210,6 @@ class BasePackageInspection:
             os.makedirs(self.raw_data_dir)
         if not self.processed_path.exists():
             os.makedirs(self.processed_path)
-
 
     def get_files_in_project(self):
         """

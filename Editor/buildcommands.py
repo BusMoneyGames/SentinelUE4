@@ -4,7 +4,13 @@ import os
 import logging
 import CONSTANTS
 import pathlib
-import Editor.editorutilities as editorUtilities
+
+if __package__ is None or __package__ == '':
+    import editorutilities as editorUtilities
+else:
+    from . import editorutilities as editorUtilities
+
+
 L = logging.getLogger(__name__)
 
 

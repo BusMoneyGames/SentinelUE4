@@ -7,7 +7,14 @@ import pathlib
 import io
 
 import CONSTANTS
-import Editor.editorutilities as editorUtilities
+
+print(__package__)
+if __package__ is None or __package__ == '':
+    import editorutilities as editorUtilities
+else:
+    from . import editorutilities as editorUtilities
+
+
 
 L = logging.getLogger(__name__)
 
