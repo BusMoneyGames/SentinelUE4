@@ -120,7 +120,7 @@ def main(raw_args=None):
 
         if args.validation_tasks:
             L.debug("Available Validation Steps: %s", "".join(get_default_automation_tasks(run_config)))
-            L.info("Running: %s validation steps", len(args.validate_preset))
+            # L.info("Running: %s validation steps", len(args.validate_preset))
 
         for each_validation_config in args.validation_tasks:
             L.info("Starting: %s", each_validation_config)
