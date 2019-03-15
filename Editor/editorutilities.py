@@ -7,6 +7,7 @@ import logging
 
 L = logging.getLogger(__name__)
 
+
 class UEUtilities:
 
     def __init__(self, run_config, platform="Win64"):
