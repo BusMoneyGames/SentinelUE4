@@ -5,9 +5,9 @@ import logging
 import CONSTANTS
 
 if __package__ is None or __package__ == '':
-    import buildcommands, commandlets, packageinspection
+    from Editor import buildcommands, commandlets, packageinspection
 else:
-    from .Editor import buildcommands, commandlets, packageinspection
+    from . Editor import buildcommands, commandlets, packageinspection
 
 COMMANDS = ["build", "validate", "run"]
 
