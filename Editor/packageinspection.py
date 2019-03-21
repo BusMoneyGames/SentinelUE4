@@ -8,7 +8,6 @@ import shutil
 
 import CONSTANTS
 
-print(__package__)
 if __package__ is None or __package__ == '':
     import commandlets, editorutilities, LogProcesser
 else:

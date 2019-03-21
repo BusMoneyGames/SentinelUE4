@@ -4,7 +4,11 @@ import json
 import logging
 import CONSTANTS
 
-from . Editor import buildcommands, commandlets, packageinspection
+if __package__ is None or __package__ == '':
+    import buildcommands, commandlets, packageinspection
+else:
+    from .Editor import buildcommands, commandlets, packageinspection
+
 COMMANDS = ["build", "validate", "run"]
 
 FORMAT = '%(message)s'
