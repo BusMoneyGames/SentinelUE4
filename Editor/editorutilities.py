@@ -45,6 +45,12 @@ class UEUtilities:
                                                     file_name
                                                     )
 
+        L.debug("Found build tool at: %s, exists: %s ", executable, str(executable.exists()))
+
+        if not executable.exists():
+            L.error("Path not found!: %s ", executable)
+            quit(1)
+
         return executable
 
     def _get_executable_ext(self):

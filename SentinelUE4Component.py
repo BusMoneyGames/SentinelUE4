@@ -90,6 +90,7 @@ def main(raw_args=None):
     args = parser.parse_args(raw_args)
 
     if args.debug:
+        print("Running in debug mode!")
         L.setLevel(logging.DEBUG)
 
     # Construct the config file

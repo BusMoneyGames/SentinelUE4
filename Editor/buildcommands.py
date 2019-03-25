@@ -72,11 +72,10 @@ class BaseUnrealBuilder:
         cmd = self.get_build_command()
 
         path = self.log_output_folder.joinpath(self.log_output_file_name)
+        L.debug("output folder path: %s", path)
 
         if not path.parent.exists():
             os.makedirs(path.parent)
-
-        L.debug(cmd)
 
         popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 

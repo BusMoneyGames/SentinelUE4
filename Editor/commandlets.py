@@ -8,7 +8,6 @@ import io
 
 import CONSTANTS
 
-print(__package__)
 if __package__ is None or __package__ == '':
     import editorutilities as editorUtilities
 else:
