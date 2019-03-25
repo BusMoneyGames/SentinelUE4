@@ -183,7 +183,7 @@ class BasePackageInspection:
         self.sentinel_structure = run_config[CONSTANTS.SENTINEL_PROJECT_STRUCTURE]
         self._construct_paths()
 
-        self.editor_util = editorutilities.UEUtilities(run_config)
+        self.editor_util = editorutilities.UE4EditorUtilities(run_config)
 
         self._clear_old_data_from_raw()
 

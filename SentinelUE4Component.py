@@ -6,8 +6,10 @@ import CONSTANTS
 
 if __package__ is None or __package__ == '':
     from Editor import buildcommands, commandlets, packageinspection
+    from Game import clientrunner
 else:
     from . Editor import buildcommands, commandlets, packageinspection
+    from . Game import clientrunner
 
 COMMANDS = ["build", "validate", "run"]
 
@@ -135,7 +137,7 @@ def main(raw_args=None):
             commandlet.run()
 
     if args.run:
-        pass
+        clientrunner.GameClientRunner(run_config)
 
 
 if __name__ == "__main__":

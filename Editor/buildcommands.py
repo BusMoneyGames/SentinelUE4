@@ -34,7 +34,7 @@ class BaseUnrealBuilder:
         self.build_settings = self.all_build_settings[self.build_config_name]
 
         self.platform = self.build_settings[CONSTANTS.UNREAL_BUILD_PLATFORM_NAME]
-        self.editor_util = editorUtilities.UEUtilities(run_config, self.platform)
+        self.editor_util = editorUtilities.UE4EditorUtilities(run_config, self.platform)
 
         self.project_root_path = pathlib.Path(self.environment_structure[CONSTANTS.UNREAL_PROJECT_ROOT])
 
@@ -183,7 +183,7 @@ class UnrealClientBuilder(BaseUnrealBuilder):
         super().__init__(run_config, build_config_name)
 
         self.log_output_file_name = self.sentinel_project_structure[CONSTANTS.SENTINEL_DEFAULT_COOK_FILE_NAME]
-        self.editor_util = editorUtilities.UEUtilities(run_config, self.platform)
+        self.editor_util = editorUtilities.UE4EditorUtilities(run_config, self.platform)
 
     def get_archive_directory(self):
 

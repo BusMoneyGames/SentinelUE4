@@ -8,7 +8,7 @@ import logging
 L = logging.getLogger(__name__)
 
 
-class UEUtilities:
+class UE4EditorUtilities:
 
     def __init__(self, run_config, platform="Win64"):
         self.platform = platform
