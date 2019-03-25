@@ -137,7 +137,7 @@ def main(raw_args=None):
             commandlet.run()
 
     if args.run:
-        clientrunner.GameClientRunner(run_config)
+        client_runner = clientrunner.GameClientRunner(run_config)
 
 
 if __name__ == "__main__":

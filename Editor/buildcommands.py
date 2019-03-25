@@ -63,6 +63,9 @@ class BaseUnrealBuilder:
         """
         return ""
 
+    def write_extra_files(self):
+        pass
+
     def run(self):
         """
         No logic in the base class, should be overwritten on the child
@@ -264,8 +267,21 @@ class UnrealClientBuilder(BaseUnrealBuilder):
             EditorComponentBuilder(self.run_config, component_name="ShaderCompileWorker").run()
             EditorComponentBuilder(self.run_config, component_name="UnrealLightmass").run()
 
-        super(UnrealClientBuilder, self).run()
+        # super(UnrealClientBuilder, self).run()
 
-    def package_for_testing(self):
-        pass
+        self.write_run_scripts()
 
+    def write_run_scripts(self):
+        if "run_scripts" in self.build_settings:
+
+            for each_run_script in self.build_settings["run_scripts"]:
+                name = each_run_script + ".bat"
+                value = self.build_settings["run_scripts"][each_run_script]
+
+                archive_dir = self.get_archive_directory().joinpath(name)
+
+                f = open(archive_dir, "w")
+                f.write(value)
+                f.close()
+
+                L.info("Wrote run script: %s", archive_dir)
