@@ -267,7 +267,7 @@ class UnrealClientBuilder(BaseUnrealBuilder):
             EditorComponentBuilder(self.run_config, component_name="ShaderCompileWorker").run()
             EditorComponentBuilder(self.run_config, component_name="UnrealLightmass").run()
 
-        # super(UnrealClientBuilder, self).run()
+        super(UnrealClientBuilder, self).run()
 
         self.write_run_scripts()
 
