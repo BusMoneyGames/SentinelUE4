@@ -2,6 +2,7 @@ import argparse
 import pathlib
 import json
 import logging
+import click
 import CONSTANTS
 
 if __package__ is None or __package__ == '':
@@ -18,7 +19,7 @@ L = logging.getLogger()
 L.setLevel(logging.INFO)
 
 
-def _read_config(assembled_config_path):
+def _read_config(assembled_config_path=""):
     """
     Reads the assembled config
 
@@ -40,9 +41,7 @@ def _read_config(assembled_config_path):
 
 def get_default_build_presets(default_run_config):
 
-    build_presets = dict(default_run_config[CONSTANTS.UNREAL_BUILD_SETTINGS_STRUCTURE])
-
-    return "\n".join(build_presets.keys())
+    return dict(default_run_config[CONSTANTS.UNREAL_BUILD_SETTINGS_STRUCTURE])
 
 
 def get_default_automation_tasks(default_run_config):
@@ -55,6 +54,57 @@ def get_default_automation_tasks(default_run_config):
             automation_tasks.append(each_automation_tasks)
 
     return "\n".join(automation_tasks)
+
+
+@click.group()
+def cli():
+    """Sentinel Unreal Component handles running commands interacting with unreal engine"""
+    pass
+
+@cli.group()
+def build():
+    """Compile and build different targets"""
+
+@build.command()
+@click.option('-o','--output', type=click.Choice(['text', 'json']), default='text', help="Output type.")
+def show_build_profiles(output):
+    """ Lists the available build profiles as defined in settings"""
+    config = _read_config()
+    presets = get_default_build_presets(config)
+
+    if output == 'text':
+        print("\n".join(presets.keys()))
+    elif output == 'json':
+        print(json.dumps(presets, indent=4))
+
+
+@build.command()
+@click.option('-p','--profile', default='default', help="Build profile to run.")
+def run_build(profile):
+    """ Runs a build for the configured build profile"""
+
+    # TODO making it so that the run config is loaded in as a global argument and made available
+    # to all steps
+
+    run_config = _read_config()
+    L.debug("Available Builds: %s", "".join(get_default_build_presets(run_config)))
+
+    builder = buildcommands.UnrealClientBuilder(run_config=run_config, build_config_name=profile) 
+    builder.run()
+
+@build.command()
+@click.option('-o','--profile', type=click.Choice(['text', 'json']), default='text', help="Output type.")
+def client(output):
+    """Generates a client build based on the build profile"""
+
+@cli.group()
+def validate():
+    """validate and extract project infrastructure information"""
+
+@cli.group()
+def run():
+    """Run client builds under different configurations"""
+
 
 
 def main(raw_args=None):
@@ -117,7 +167,6 @@ def main(raw_args=None):
             builder.run()
 
     if args.validate:
-
         if args.validation_inspect:
             L.info('Running Full Validation Export')
             packageinspection.BasePackageInspection(run_config).run()
@@ -136,4 +185,4 @@ def main(raw_args=None):
 
 
 if __name__ == "__main__":
-    main()
+    cli()
