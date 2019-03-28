@@ -12,8 +12,6 @@ else:
     from . Editor import buildcommands, commandlets, packageinspection
     from . Game import clientrunner
 
-COMMANDS = ["build", "validate", "run"]
-
 L = logging.getLogger()
 
 
@@ -38,20 +36,13 @@ def _read_config(assembled_config_path=""):
 
 
 def get_default_build_presets(default_run_config):
-
+    """ Read the build presets from the config """
     return dict(default_run_config[CONSTANTS.UNREAL_BUILD_SETTINGS_STRUCTURE])
 
 
-def get_default_automation_tasks(default_run_config):
-
-    commandlet_settings = dict(default_run_config[CONSTANTS.COMMANDLET_SETTINGS])
-    automation_tasks = []
-
-    for each_automation_tasks in commandlet_settings.keys():
-        if not each_automation_tasks.startswith("_"):
-            automation_tasks.append(each_automation_tasks)
-
-    return "\n".join(automation_tasks)
+def get_validate_presets(default_run_config):
+    """ Read the commandlets settings from the config """
+    return dict(default_run_config[CONSTANTS.COMMANDLET_SETTINGS])
 
 
 @click.group()
@@ -77,9 +68,9 @@ def show_build_profiles(output):
 
 
 @build.command()
-@click.option('-p','--profile', default='default', help="Build profile to run.")
+@click.option('-p','--preset', default='default', help="Build profile to run.")
 def run_build(profile):
-    """ Runs a build for the configured build profile"""
+    """ Runs a build for the configured build preset"""
 
     # TODO making it so that the run config is loaded in as a global argument and made available
     # to all steps
@@ -99,94 +90,44 @@ def client(output):
 def validate():
     """validate and extract project infrastructure information"""
 
+@validate.command()
+@click.option('-o','--output', type=click.Choice(['text', 'json']), default='text', help="Output type.")
+def show_validate_profiles(output):
+    """ output validation profiles"""
+    config = _read_config()
+    presets = get_validate_presets(config)
+
+    if output == 'text':
+        print("\n".join(presets.keys()))
+    elif output == 'json':
+        print(json.dumps(presets, indent=4))
+
+@validate.command()
+@click.option('-o','--task', help="Output type.")
+def run_validation_task(task):
+    """ Runs a validation task """
+    #TODO Handle the config overwrite
+    config = _read_config()
+
+    presets = get_validate_presets(config)
+
+    if not task or task not in presets:
+        L.error("Task %s does not exist", task) 
+    else:
+        commandlet = commandlets.BaseUE4Commandlet(config, task)
+        commandlet.run()
+
+@validate.command()
+def refresh_asset_info():
+    """ extracts raw information about assets"""
+    #TODO Handle the config overwrite
+    config = _read_config()
+    packageinspection.BasePackageInspection(config).run()
+
 @cli.group()
 def run():
     """Run client builds under different configurations"""
-
-
-
-def main(raw_args=None):
-
-    parser = argparse.ArgumentParser(description='Runs sentinel tasks for Unreal Engine.',
-                                     add_help=True,
-                                     formatter_class=argparse.RawTextHelpFormatter)
-
-    parser.add_argument("-build", action='store_true')
-    parser.add_argument("-validate", action='store_true')
-    parser.add_argument("-run", action='store_true')
-
-    global_settings = parser.add_argument_group('Global Settings')
-    global_settings.add_argument("-config", default="", help="Absolute or relative path to"
-                                                             " the config directory if other than default")
-    global_settings.add_argument("-debug", action='store_true', help="Enables detailed logging")
-    global_settings.add_argument("-detailed_help", action='store_true')
-    global_settings.add_argument("-deploy", action='store_true', help="Uploads the artifacts to the server")
-
-    # Build settings
-    build_tasks = parser.add_argument_group('Build Settings')
-    build_tasks.add_argument('-build_preset', nargs='*', default=[])
-
-    # Validation settings
-    validate_settings = parser.add_argument_group('Validation Settings')
-    validate_settings.add_argument('-validation_tasks', nargs='*', default=[])
-    validate_settings.add_argument('-validation_inspect', action='store_true')
-
-    # Run Settings
-    run_settings = parser.add_argument_group('Run Settings')
-    run_settings.add_argument('-run_tasks', nargs='*')
-
-    args = parser.parse_args(raw_args)
-
-    if args.debug:
-        print("Running in debug mode!")
-        FORMAT = '%(levelname)s - %(funcName)s - %(message)s'
-        logging.basicConfig(format=FORMAT)
-        L.setLevel(logging.DEBUG)
-    else:
-        FORMAT = '%(levelname)s - %(message)s'
-        logging.basicConfig(format=FORMAT)
-        L.setLevel(logging.DEBUG)
-
-    # Construct the config file
-    L.info("Reading Config From: %s", args.config)
-
-    run_config = _read_config(args.config)
-
-    if args.detailed_help:
-        L.info("Showing detailed help")
-        return
-
-    if args.build:
-        L.debug("Available Builds: %s", "".join(get_default_build_presets(run_config)))
-
-        if len(args.build_preset) == 0:
-            L.info("No Build preset specified,  running with default")
-            args.build_preset = ["default"]
-
-        L.info("Running: %s builds", len(args.build_preset))
-        for each_config in args.build_preset:
-            L.info("Starting: %s", each_config)
-            builder = buildcommands.UnrealClientBuilder(run_config=run_config,
-                                                        build_config_name=each_config
-                                                        )
-            builder.run()
-
-    if args.validate:
-        if args.validation_inspect:
-            L.info('Running Full Validation Export')
-            packageinspection.BasePackageInspection(run_config).run()
-
-        if args.validation_tasks:
-            L.debug("Available Validation Steps: %s", "".join(get_default_automation_tasks(run_config)))
-            # L.info("Running: %s validation steps", len(args.validate_preset))
-
-        for each_validation_config in args.validation_tasks:
-            L.info("Starting: %s", each_validation_config)
-            commandlet = commandlets.BaseUE4Commandlet(run_config, each_validation_config)
-            commandlet.run()
-
-    if args.run:
-        client_runner = clientrunner.GameClientRunner(run_config)
+    pass
 
 
 if __name__ == "__main__":
