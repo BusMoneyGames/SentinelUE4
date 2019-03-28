@@ -7,16 +7,14 @@ import CONSTANTS
 
 if __package__ is None or __package__ == '':
     from Editor import buildcommands, commandlets, packageinspection
+    from Game import clientrunner
 else:
     from . Editor import buildcommands, commandlets, packageinspection
+    from . Game import clientrunner
 
 COMMANDS = ["build", "validate", "run"]
 
-FORMAT = '%(message)s'
-logging.basicConfig(format=FORMAT)
-
 L = logging.getLogger()
-L.setLevel(logging.INFO)
 
 
 def _read_config(assembled_config_path=""):
@@ -140,6 +138,13 @@ def main(raw_args=None):
     args = parser.parse_args(raw_args)
 
     if args.debug:
+        print("Running in debug mode!")
+        FORMAT = '%(levelname)s - %(funcName)s - %(message)s'
+        logging.basicConfig(format=FORMAT)
+        L.setLevel(logging.DEBUG)
+    else:
+        FORMAT = '%(levelname)s - %(message)s'
+        logging.basicConfig(format=FORMAT)
         L.setLevel(logging.DEBUG)
 
     # Construct the config file
@@ -181,7 +186,7 @@ def main(raw_args=None):
             commandlet.run()
 
     if args.run:
-        pass
+        client_runner = clientrunner.GameClientRunner(run_config)
 
 
 if __name__ == "__main__":

@@ -34,7 +34,7 @@ class BaseUnrealBuilder:
         self.build_settings = self.all_build_settings[self.build_config_name]
 
         self.platform = self.build_settings[CONSTANTS.UNREAL_BUILD_PLATFORM_NAME]
-        self.editor_util = editorUtilities.UEUtilities(run_config, self.platform)
+        self.editor_util = editorUtilities.UE4EditorUtilities(run_config, self.platform)
 
         self.project_root_path = pathlib.Path(self.environment_structure[CONSTANTS.UNREAL_PROJECT_ROOT])
 
@@ -63,6 +63,9 @@ class BaseUnrealBuilder:
         """
         return ""
 
+    def write_extra_files(self):
+        pass
+
     def run(self):
         """
         No logic in the base class, should be overwritten on the child
@@ -72,11 +75,10 @@ class BaseUnrealBuilder:
         cmd = self.get_build_command()
 
         path = self.log_output_folder.joinpath(self.log_output_file_name)
+        L.debug("output folder path: %s", path)
 
         if not path.parent.exists():
             os.makedirs(path.parent)
-
-        L.debug(cmd)
 
         popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
@@ -184,7 +186,7 @@ class UnrealClientBuilder(BaseUnrealBuilder):
         super().__init__(run_config, build_config_name)
 
         self.log_output_file_name = self.sentinel_project_structure[CONSTANTS.SENTINEL_DEFAULT_COOK_FILE_NAME]
-        self.editor_util = editorUtilities.UEUtilities(run_config, self.platform)
+        self.editor_util = editorUtilities.UE4EditorUtilities(run_config, self.platform)
 
     def get_archive_directory(self):
 
@@ -265,8 +267,21 @@ class UnrealClientBuilder(BaseUnrealBuilder):
             EditorComponentBuilder(self.run_config, component_name="ShaderCompileWorker").run()
             EditorComponentBuilder(self.run_config, component_name="UnrealLightmass").run()
 
-        super(UnrealClientBuilder, self).run()
+        # super(UnrealClientBuilder, self).run()
 
-    def package_for_testing(self):
-        pass
+        self.write_run_scripts()
 
+    def write_run_scripts(self):
+        if "run_scripts" in self.build_settings:
+
+            for each_run_script in self.build_settings["run_scripts"]:
+                name = each_run_script + ".bat"
+                value = self.build_settings["run_scripts"][each_run_script]
+
+                archive_dir = self.get_archive_directory().joinpath(name)
+
+                f = open(archive_dir, "w")
+                f.write(value)
+                f.close()
+
+                L.info("Wrote run script: %s", archive_dir)

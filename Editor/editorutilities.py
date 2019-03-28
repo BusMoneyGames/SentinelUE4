@@ -8,7 +8,7 @@ import logging
 L = logging.getLogger(__name__)
 
 
-class UEUtilities:
+class UE4EditorUtilities:
 
     def __init__(self, run_config, platform="Win64"):
         self.platform = platform
@@ -44,6 +44,12 @@ class UEUtilities:
         executable = self.engine_root_path.joinpath(engine_root_folder,
                                                     file_name
                                                     )
+
+        L.debug("Found build tool at: %s, exists: %s ", executable, str(executable.exists()))
+
+        if not executable.exists():
+            L.error("Path not found!: %s ", executable)
+            quit(1)
 
         return executable
 

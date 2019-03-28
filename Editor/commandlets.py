@@ -8,12 +8,10 @@ import io
 
 import CONSTANTS
 
-print(__package__)
 if __package__ is None or __package__ == '':
     import editorutilities as editorUtilities
 else:
     from . import editorutilities as editorUtilities
-
 
 
 L = logging.getLogger(__name__)
@@ -35,7 +33,7 @@ class BaseUE4Commandlet:
         self.files = files
         self.platform = platform
 
-        self.editor_util = editorUtilities.UEUtilities(run_config, self.platform)
+        self.editor_util = editorUtilities.UE4EditorUtilities(run_config, self.platform)
 
         if log_file_name:
             self.log_file_name = log_file_name
