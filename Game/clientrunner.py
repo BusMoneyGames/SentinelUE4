@@ -1,6 +1,6 @@
 # coding=utf-8
 import subprocess
-import CONSTANTS
+import ue4_constants
 
 if __package__ is None or __package__ == '':
     import clientutilities

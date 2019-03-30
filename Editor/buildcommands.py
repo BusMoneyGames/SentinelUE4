@@ -2,7 +2,7 @@
 import subprocess
 import os
 import logging
-import CONSTANTS
+import ue4_constants
 import pathlib
 
 if __package__ is None or __package__ == '':
@@ -26,22 +26,22 @@ class BaseUnrealBuilder:
         """
 
         self.run_config = run_config
-        self.environment_structure = self.run_config[CONSTANTS.ENVIRONMENT_CATEGORY]
-        self.all_build_settings = self.run_config[CONSTANTS.UNREAL_BUILD_SETTINGS_STRUCTURE]
+        self.environment_structure = self.run_config[ue4_constants.ENVIRONMENT_CATEGORY]
+        self.all_build_settings = self.run_config[ue4_constants.UNREAL_BUILD_SETTINGS_STRUCTURE]
 
         # TODO Add logic to be able to switch the build settings
         self.build_config_name = build_config_name
         self.build_settings = self.all_build_settings[self.build_config_name]
 
-        self.platform = self.build_settings[CONSTANTS.UNREAL_BUILD_PLATFORM_NAME]
+        self.platform = self.build_settings[ue4_constants.UNREAL_BUILD_PLATFORM_NAME]
         self.editor_util = editorUtilities.UE4EditorUtilities(run_config, self.platform)
 
-        self.project_root_path = pathlib.Path(self.environment_structure[CONSTANTS.UNREAL_PROJECT_ROOT])
+        self.project_root_path = pathlib.Path(self.environment_structure[ue4_constants.UNREAL_PROJECT_ROOT])
 
-        self.sentinel_project_structure = self.run_config[CONSTANTS.SENTINEL_PROJECT_STRUCTURE]
+        self.sentinel_project_structure = self.run_config[ue4_constants.SENTINEL_PROJECT_STRUCTURE]
 
-        sentinel_root = pathlib.Path(self.environment_structure[CONSTANTS.SENTINEL_ARTIFACTS_ROOT_PATH])
-        sentinel_logs_path = self.sentinel_project_structure[CONSTANTS.SENTINEL_RAW_LOGS_PATH]
+        sentinel_root = pathlib.Path(self.environment_structure[ue4_constants.SENTINEL_ARTIFACTS_ROOT_PATH])
+        sentinel_logs_path = self.sentinel_project_structure[ue4_constants.SENTINEL_RAW_LOGS_PATH]
 
         self.log_output_folder = sentinel_root.joinpath(sentinel_logs_path)
 
@@ -138,7 +138,7 @@ class UnrealEditorBuilder(BaseUnrealBuilder):
 
         super().__init__(run_config)
 
-        self.log_output_file_name = self.sentinel_project_structure[CONSTANTS.SENTINEL_DEFAULT_COMPILE_FILE_NAME]
+        self.log_output_file_name = self.sentinel_project_structure[ue4_constants.SENTINEL_DEFAULT_COMPILE_FILE_NAME]
 
     def get_build_command(self):
         """
@@ -159,7 +159,7 @@ class UnrealEditorBuilder(BaseUnrealBuilder):
                     ]
 
         # Adding the compile flags at the end of the settings
-        compile_flags = self._prefix_config_with_dash(self.build_settings[CONSTANTS.UNREAL_EDITOR_COMPILE_FLAGS])
+        compile_flags = self._prefix_config_with_dash(self.build_settings[ue4_constants.UNREAL_EDITOR_COMPILE_FLAGS])
         cmd_list.extend(compile_flags)
 
         cmd = " ".join(cmd_list)
@@ -185,13 +185,13 @@ class UnrealClientBuilder(BaseUnrealBuilder):
         """
         super().__init__(run_config, build_config_name)
 
-        self.log_output_file_name = self.sentinel_project_structure[CONSTANTS.SENTINEL_DEFAULT_COOK_FILE_NAME]
+        self.log_output_file_name = self.sentinel_project_structure[ue4_constants.SENTINEL_DEFAULT_COOK_FILE_NAME]
         self.editor_util = editorUtilities.UE4EditorUtilities(run_config, self.platform)
 
     def get_archive_directory(self):
 
-        sentinel_output_root = self.environment_structure[CONSTANTS.SENTINEL_ARTIFACTS_ROOT_PATH]
-        build_folder_name = self.sentinel_project_structure[CONSTANTS.SENTINEL_BUILD_PATH]
+        sentinel_output_root = self.environment_structure[ue4_constants.SENTINEL_ARTIFACTS_ROOT_PATH]
+        build_folder_name = self.sentinel_project_structure[ue4_constants.SENTINEL_BUILD_PATH]
         out_dir = self.project_root_path.joinpath(sentinel_output_root, build_folder_name, self.build_config_name)
 
         out_dir = pathlib.Path(out_dir)
@@ -208,10 +208,10 @@ class UnrealClientBuilder(BaseUnrealBuilder):
 
         project_path = self.editor_util.get_project_file_path()
 
-        engine_root = self.project_root_path.joinpath(self.environment_structure[CONSTANTS.ENGINE_ROOT_PATH]).resolve()
+        engine_root = self.project_root_path.joinpath(self.environment_structure[ue4_constants.ENGINE_ROOT_PATH]).resolve()
 
-        build_command_name = self.build_settings[CONSTANTS.UNREAL_BUILD_COMMAND_NAME]
-        build_config = self.build_settings[CONSTANTS.UNREAL_BUILD_CONFIGURATION]
+        build_command_name = self.build_settings[ue4_constants.UNREAL_BUILD_COMMAND_NAME]
+        build_config = self.build_settings[ue4_constants.UNREAL_BUILD_CONFIGURATION]
 
         # self.get_cook_list_string()
 
@@ -224,7 +224,7 @@ class UnrealClientBuilder(BaseUnrealBuilder):
                     "-targetplatform=" + self.platform
                     ]
 
-        config_flags = self._prefix_config_with_dash(self.build_settings[CONSTANTS.UNREAL_BUILD_CONFIG_FLAGS])
+        config_flags = self._prefix_config_with_dash(self.build_settings[ue4_constants.UNREAL_BUILD_CONFIG_FLAGS])
 
         if "-archive" in config_flags:
             archive_dir_flag = "-archivedirectory=" + str(self.get_archive_directory())

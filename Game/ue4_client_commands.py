@@ -1,5 +1,5 @@
 # coding=utf-8
-import CONSTANTS
+import ue4_constants
 import os
 import subprocess
 import shutil
@@ -20,7 +20,7 @@ def run_startup_test(path_obj):
     # Remove the test directory
 
     # Fetching the target build folder path
-    build_folder_path = path_obj.get_output_data_path(CONSTANTS.BUILD_FOLDER_PATH)
+    build_folder_path = path_obj.get_output_data_path(ue4_constants.BUILD_FOLDER_PATH)
     L.info("Build folder path: " + build_folder_path.as_posix())
 
     files = os.listdir(build_folder_path)

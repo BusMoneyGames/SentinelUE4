@@ -6,7 +6,7 @@ import logging
 import pathlib
 import io
 
-import CONSTANTS
+import ue4_constants
 
 if __package__ is None or __package__ == '':
     import editorutilities as editorUtilities
@@ -28,8 +28,8 @@ class BaseUE4Commandlet:
 
         self.run_config = run_config
         self.commandlet_name = commandlet_name
-        self.environment_config = self.run_config[CONSTANTS.ENVIRONMENT_CATEGORY]
-        self.sentinel_structure_config = self.run_config[CONSTANTS.SENTINEL_PROJECT_STRUCTURE]
+        self.environment_config = self.run_config[ue4_constants.ENVIRONMENT_CATEGORY]
+        self.sentinel_structure_config = self.run_config[ue4_constants.SENTINEL_PROJECT_STRUCTURE]
         self.files = files
         self.platform = platform
 
@@ -40,22 +40,22 @@ class BaseUE4Commandlet:
         else:
             self.log_file_name = self.commandlet_name + ".log"
 
-        commandlet_settings_config = self.run_config[CONSTANTS.COMMANDLET_SETTINGS]
+        commandlet_settings_config = self.run_config[ue4_constants.COMMANDLET_SETTINGS]
 
         self.commandlet_settings = commandlet_settings_config[self.commandlet_name]
 
         # Getting paths and making them absolute
-        self.project_root_path = pathlib.Path(self.environment_config[CONSTANTS.UNREAL_PROJECT_ROOT]).resolve()
+        self.project_root_path = pathlib.Path(self.environment_config[ue4_constants.UNREAL_PROJECT_ROOT]).resolve()
 
         L.debug("Project Root Path: %s", self.project_root_path)
-        self.engine_root_path = pathlib.Path(self.environment_config[CONSTANTS.ENGINE_ROOT_PATH]).resolve()
+        self.engine_root_path = pathlib.Path(self.environment_config[ue4_constants.ENGINE_ROOT_PATH]).resolve()
 
         self.raw_log_path = self.project_root_path.joinpath(self.environment_config[
-                                                                CONSTANTS.SENTINEL_ARTIFACTS_ROOT_PATH])
+                                                                ue4_constants.SENTINEL_ARTIFACTS_ROOT_PATH])
         self.raw_log_path = self.raw_log_path.resolve()
 
         # Information about the relative structure of ue4
-        self.ue_structure = self.run_config[CONSTANTS.UNREAL_ENGINE_STRUCTURE]
+        self.ue_structure = self.run_config[ue4_constants.UNREAL_ENGINE_STRUCTURE]
 
     def get_commandlet_settings(self):
 

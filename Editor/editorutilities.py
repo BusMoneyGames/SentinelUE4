@@ -1,6 +1,6 @@
 import shutil
 
-import CONSTANTS
+import ue4_constants
 import sys
 import pathlib
 import logging
@@ -14,17 +14,17 @@ class UE4EditorUtilities:
         self.platform = platform
         self.run_config = run_config
 
-        self.ue_structure = self.run_config[CONSTANTS.UNREAL_ENGINE_STRUCTURE]
-        self.environment_structure = self.run_config[CONSTANTS.ENVIRONMENT_CATEGORY]
+        self.ue_structure = self.run_config[ue4_constants.UNREAL_ENGINE_STRUCTURE]
+        self.environment_structure = self.run_config[ue4_constants.ENVIRONMENT_CATEGORY]
 
-        self.project_root_path = pathlib.Path(self.environment_structure[CONSTANTS.UNREAL_PROJECT_ROOT])
+        self.project_root_path = pathlib.Path(self.environment_structure[ue4_constants.UNREAL_PROJECT_ROOT])
 
-        self.engine_root_path = pathlib.Path(self.environment_structure[CONSTANTS.ENGINE_ROOT_PATH])
+        self.engine_root_path = pathlib.Path(self.environment_structure[ue4_constants.ENGINE_ROOT_PATH])
 
     def get_editor_executable_path(self):
 
-        file_name = self.ue_structure[CONSTANTS.UNREAL_ENGINE_WIN64_CMD_EXE] + self._get_executable_ext()
-        executable = self.engine_root_path.joinpath(self.ue_structure[CONSTANTS.UNREAL_ENGINE_BINARIES_ROOT],
+        file_name = self.ue_structure[ue4_constants.UNREAL_ENGINE_WIN64_CMD_EXE] + self._get_executable_ext()
+        executable = self.engine_root_path.joinpath(self.ue_structure[ue4_constants.UNREAL_ENGINE_BINARIES_ROOT],
                                                     self.platform,
                                                     file_name
                                                     )
@@ -36,11 +36,11 @@ class UE4EditorUtilities:
     def get_unreal_build_tool_path(self):
 
         engine_root_folder = self.project_root_path.joinpath(self.environment_structure[
-                                                                 CONSTANTS.ENGINE_ROOT_PATH]).resolve()
+                                                                 ue4_constants.ENGINE_ROOT_PATH]).resolve()
 
         engine_root_folder = engine_root_folder.joinpath("Engine")
 
-        file_name = self.ue_structure[CONSTANTS.UNREAL_ENGINE_UBT_EXE] + self._get_executable_ext()
+        file_name = self.ue_structure[ue4_constants.UNREAL_ENGINE_UBT_EXE] + self._get_executable_ext()
         executable = self.engine_root_path.joinpath(engine_root_folder,
                                                     file_name
                                                     )
@@ -61,7 +61,7 @@ class UE4EditorUtilities:
 
     def get_all_content_files(self):
 
-        content_relative_path = self.run_config[CONSTANTS.UNREAL_PROJECT_STRUCTURE][CONSTANTS.UNREAL_CONTENT_ROOT_PATH]
+        content_relative_path = self.run_config[ue4_constants.UNREAL_PROJECT_STRUCTURE][ue4_constants.UNREAL_CONTENT_ROOT_PATH]
         unreal_project_root = self.get_project_file_path().parent
 
         L.debug("Unreal Project Root: %s ", unreal_project_root)
@@ -78,11 +78,13 @@ class UE4EditorUtilities:
 
     def get_project_file_path(self):
 
-        path = pathlib.Path(self.environment_structure[CONSTANTS.UNREAL_PROJECT_ROOT])
+        path = pathlib.Path(self.environment_structure[ue4_constants.UNREAL_PROJECT_ROOT])
 
         for e in path.glob("**/*.uproject"):
             return e
 
+        L.error("Unable to find project file at: %s", path)
+        quit(1)
         raise FileNotFoundError
 
 

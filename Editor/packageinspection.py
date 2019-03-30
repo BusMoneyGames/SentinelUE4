@@ -6,7 +6,7 @@ import os
 import pathlib
 import shutil
 
-import CONSTANTS
+import ue4_constants
 
 if __package__ is None or __package__ == '':
     import commandlets, editorutilities, LogProcesser
@@ -179,8 +179,8 @@ class BasePackageInspection:
     def __init__(self, run_config):
         L.info("Starting Package Inspection")
         self.run_config = run_config
-        self.environment_config = run_config[CONSTANTS.ENVIRONMENT_CATEGORY]
-        self.sentinel_structure = run_config[CONSTANTS.SENTINEL_PROJECT_STRUCTURE]
+        self.environment_config = run_config[ue4_constants.ENVIRONMENT_CATEGORY]
+        self.sentinel_structure = run_config[ue4_constants.SENTINEL_PROJECT_STRUCTURE]
         self._construct_paths()
 
         self.editor_util = editorutilities.UE4EditorUtilities(run_config)
@@ -194,15 +194,15 @@ class BasePackageInspection:
     def _construct_paths(self):
         """Makes the paths for outputs inside of the root artifact folder"""
 
-        self.sentinel_root = pathlib.Path(self.environment_config[CONSTANTS.SENTINEL_ARTIFACTS_ROOT_PATH])
+        self.sentinel_root = pathlib.Path(self.environment_config[ue4_constants.SENTINEL_ARTIFACTS_ROOT_PATH])
         L.debug("Sentinel Root: %s ", self.sentinel_root)
 
         self.archive_folder_path = self.sentinel_root.joinpath(self.sentinel_structure[
-                                                                   CONSTANTS.SENTINEL_CACHE_ROOT]).resolve()
+                                                                   ue4_constants.SENTINEL_CACHE_ROOT]).resolve()
         self.raw_data_dir = self.sentinel_root.joinpath(self.sentinel_structure[
-                                                            CONSTANTS.SENTINEL_RAW_LOGS_PATH]).resolve()
+                                                            ue4_constants.SENTINEL_RAW_LOGS_PATH]).resolve()
         self.processed_path = self.sentinel_root.joinpath(self.sentinel_structure[
-                                                              CONSTANTS.SENTINEL_PROCESSED_PATH]).resolve()
+                                                              ue4_constants.SENTINEL_PROCESSED_PATH]).resolve()
 
         if not self.archive_folder_path.exists():
             os.makedirs(self.archive_folder_path)
@@ -486,8 +486,8 @@ class ProcessPackageInfo:
     def __init__(self, run_config):
 
         self.run_config = run_config
-        self.environment_config = run_config[CONSTANTS.ENVIRONMENT_CATEGORY]
-        self.sentinel_structure = run_config[CONSTANTS.SENTINEL_PROJECT_STRUCTURE]
+        self.environment_config = run_config[ue4_constants.ENVIRONMENT_CATEGORY]
+        self.sentinel_structure = run_config[ue4_constants.SENTINEL_PROJECT_STRUCTURE]
         self._construct_paths()
 
         self.pkg_extractor = BasePackageInspection(run_config)
@@ -495,13 +495,13 @@ class ProcessPackageInfo:
     def _construct_paths(self):
         """Makes the paths for outputs inside of the root artifact folder"""
 
-        self.sentinel_root = self.environment_config[CONSTANTS.SENTINEL_ARTIFACTS_ROOT_PATH]
+        self.sentinel_root = self.environment_config[ue4_constants.SENTINEL_ARTIFACTS_ROOT_PATH]
         self.archive_folder_path = self.sentinel_root.joinpath(self.sentinel_structure[
-                                                                   CONSTANTS.SENTINEL_CACHE_ROOT]).resolve()
+                                                                   ue4_constants.SENTINEL_CACHE_ROOT]).resolve()
         self.raw_data_dir = self.sentinel_root.joinpath(self.sentinel_structure[
-                                                            CONSTANTS.SENTINEL_RAW_LOGS_PATH]).resolve()
+                                                            ue4_constants.SENTINEL_RAW_LOGS_PATH]).resolve()
         self.processed_path = self.sentinel_root.joinpath(self.sentinel_structure[
-                                                              CONSTANTS.SENTINEL_PROCESSED_PATH]).resolve()
+                                                              ue4_constants.SENTINEL_PROCESSED_PATH]).resolve()
 
         if not self.archive_folder_path.exists():
             os.makedirs(self.archive_folder_path)
