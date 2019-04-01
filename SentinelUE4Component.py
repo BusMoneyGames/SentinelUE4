@@ -116,8 +116,8 @@ def build():
 @click.pass_context
 def show_build_profiles(ctx,output):
     """ Lists the available build profiles as defined in settings"""
-    config = _read_config(ctx.obj['CONFIG_OVERWRITE'])
-    presets = get_default_build_presets(config)
+    run_config = ctx.obj['RUN_CONFIG']
+    presets = get_default_build_presets(run_config)
     
     if output == 'text':
         print("\n".join(presets.keys()))
@@ -153,7 +153,7 @@ def validate():
 
 
 @validate.command()
-@click.option('-o','--output', type=click.Choice(['text', 'json']), default='text', help="Output type.")
+@click.option('-o', '--output', type=click.Choice(['text', 'json']), default='text', help="Output type.")
 def show_validate_profiles(output):
     """ output validation profiles"""
     config = _read_config()
