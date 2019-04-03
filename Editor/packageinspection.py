@@ -197,10 +197,11 @@ class BasePackageInspection:
         self.sentinel_root = pathlib.Path(self.environment_config[ue4_constants.SENTINEL_ARTIFACTS_ROOT_PATH])
         L.debug("Sentinel Root: %s ", self.sentinel_root)
 
-        self.archive_folder_path = self.sentinel_root.joinpath(self.sentinel_structure[
-                                                                   ue4_constants.SENTINEL_CACHE_ROOT]).resolve()
+        self.archive_folder_path = pathlib.Path(self.environment_config[ue4_constants.SENTINEL_CACHE_ROOT])
+
         self.raw_data_dir = self.sentinel_root.joinpath(self.sentinel_structure[
                                                             ue4_constants.SENTINEL_RAW_LOGS_PATH]).resolve()
+
         self.processed_path = self.sentinel_root.joinpath(self.sentinel_structure[
                                                               ue4_constants.SENTINEL_PROCESSED_PATH]).resolve()
 
