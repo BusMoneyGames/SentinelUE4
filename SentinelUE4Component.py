@@ -126,7 +126,7 @@ def show_build_profiles(ctx,output):
 
 @build.command()
 @click.pass_context
-@click.option('-p', '--preset', default='default', help="Build profile to run.")
+@click.option('-p', '--preset', default='windows_default_client', help="Build profile to run.")
 def run_build(ctx, preset):
     """ Runs a build for the configured build preset"""
 

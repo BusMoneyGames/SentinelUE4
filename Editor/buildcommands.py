@@ -19,7 +19,7 @@ class BaseUnrealBuilder:
     Base class for triggering builds for an unreal engine project
     """
 
-    def __init__(self, run_config, build_config_name="default"):
+    def __init__(self, run_config, build_config_name="windows_default_client"):
 
         """
         :param unreal_project_info:
@@ -28,6 +28,8 @@ class BaseUnrealBuilder:
         self.run_config = run_config
         self.environment_structure = self.run_config[ue4_constants.ENVIRONMENT_CATEGORY]
         self.all_build_settings = self.run_config[ue4_constants.UNREAL_BUILD_SETTINGS_STRUCTURE]
+
+        print(self.all_build_settings)
 
         # TODO Add logic to be able to switch the build settings
         self.build_config_name = build_config_name
@@ -104,7 +106,7 @@ class EditorComponentBuilder(BaseUnrealBuilder):
 
     def __init__(self, run_config, component_name="ShaderCompileWorker"):
         self.component_name = component_name
-        super(EditorComponentBuilder, self).__init__(run_config, build_config_name="default")
+        super(EditorComponentBuilder, self).__init__(run_config, build_config_name="windows_default_client")
 
     def get_build_command(self):
 
@@ -178,7 +180,7 @@ class UnrealClientBuilder(BaseUnrealBuilder):
     deploy location
     """
 
-    def __init__(self, run_config, build_config_name="default"):
+    def __init__(self, run_config, build_config_name="windows_default_client"):
         """
         Use the settings from the path object to build the client based on the settings in the settings folder
         :param unreal_project_info:
