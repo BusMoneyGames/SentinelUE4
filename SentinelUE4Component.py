@@ -113,7 +113,7 @@ def build():
 @build.command()
 @click.option('-o', '--output', type=click.Choice(['text', 'json']), default='text', help="Output type.")
 @click.pass_context
-def show_build_profiles(ctx,output):
+def show_build_profiles(ctx, output):
     """ Lists the available build profiles as defined in settings"""
     run_config = ctx.obj['RUN_CONFIG']
     presets = get_default_build_presets(run_config)
@@ -140,23 +140,19 @@ def run_build(ctx, preset):
     builder.run()
 
 
-@build.command()
-@click.option('-o','--profile', type=click.Choice(['text', 'json']), default='text', help="Output type.")
-def client(output):
-    """Generates a client build based on the build profile"""
-
-
 @cli.group()
 def validate():
     """validate and extract project infrastructure information"""
 
 
 @validate.command()
+@click.pass_context
 @click.option('-o', '--output', type=click.Choice(['text', 'json']), default='text', help="Output type.")
-def show_validate_profiles(output):
+def show_validate_profiles(ctx, output):
     """ output validation profiles"""
-    config = _read_config()
-    presets = get_validate_presets(config)
+    run_config = ctx.obj['RUN_CONFIG']
+
+    presets = get_validate_presets(run_config)
 
     if output == 'text':
         print("\n".join(presets.keys()))
@@ -165,28 +161,30 @@ def show_validate_profiles(output):
 
 
 @validate.command()
-@click.option('-o','--task', help="Output type.")
-def run_validation_task(task):
+@click.pass_context
+@click.option('-o', '--task', help="Output type.")
+def run_validation_task(ctx, task):
     """ Runs a validation task """
 
     # TODO Handle the config overwrite
-    config = _read_config()
-
-    presets = get_validate_presets(config)
+    run_config = ctx.obj['RUN_CONFIG']
+    presets = get_validate_presets(run_config)
 
     if not task or task not in presets:
         L.error("Task %s does not exist", task) 
     else:
-        commandlet = commandlets.BaseUE4Commandlet(config, task)
+        commandlet = commandlets.BaseUE4Commandlet(run_config, task)
         commandlet.run()
 
 
 @validate.command()
-def refresh_asset_info():
+@click.pass_context
+def refresh_asset_info(ctx):
     """ extracts raw information about assets"""
+
     #TODO Handle the config overwrite
-    config = _read_config()
-    packageinspection.BasePackageInspection(config).run()
+    run_config = ctx.obj['RUN_CONFIG']
+    packageinspection.BasePackageInspection(run_config).run()
 
 
 @cli.group()

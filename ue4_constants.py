@@ -18,7 +18,7 @@ UNREAL_ENGINE_WIN64_CMD_EXE = "editor_binary_cmd_name"
 UNREAL_ENGINE_WIN64_EXE = "editor_binary_name"
 UNREAL_ENGINE_UBT_EXE = "unreal_build_tool_path"
 
-UNREAL_PROJECT_STRUCTURE = "ue_project_structure"
+UNREAL_PROJECT_STRUCTURE = "unreal_project_structure"
 UNREAL_CONTENT_ROOT_PATH = "content_root_path"
 
 SENTINEL_PROJECT_STRUCTURE = "sentinel_internal_structure"
