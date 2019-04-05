@@ -185,6 +185,7 @@ class UnrealClientBuilder(BaseUnrealBuilder):
         Use the settings from the path object to build the client based on the settings in the settings folder
         :param unreal_project_info:
         """
+
         super().__init__(run_config, build_config_name)
 
         self.log_output_file_name = self.sentinel_project_structure[ue4_constants.SENTINEL_DEFAULT_COOK_FILE_NAME]

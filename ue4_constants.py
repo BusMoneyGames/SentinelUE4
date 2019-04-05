@@ -1,5 +1,5 @@
 GENERATED_CONFIG_FILE_NAME = "_generated_sentinel_config.json"
-
+BUILD_ARCHIVE_DIR = "archived"
 ENVIRONMENT_CATEGORY = "environment"
 ENGINE_ROOT_PATH = "engine_root_path"
 SENTINEL_ARTIFACTS_ROOT_PATH = "sentinel_artifacts_path"
@@ -36,4 +36,5 @@ UNREAL_BUILD_COMMAND_NAME = "build_command"
 UNREAL_BUILD_CONFIG_FLAGS = "build_flags"
 UNREAL_BUILD_CONFIGURATION = "build_configuration"
 UNREAL_EDITOR_COMPILE_FLAGS = "editor_compile_flags"
+
 

@@ -5,6 +5,7 @@ import os
 import click
 import ue4_constants
 from click import echo, secho
+import shutil
 
 if __package__ is None or __package__ == '':
     from Editor import buildcommands, commandlets, packageinspection
@@ -14,6 +15,7 @@ else:
     from . Game import clientrunner
 
 L = logging.getLogger()
+
 
 def tabulate(headers, rows, indent=None, col_padding=None):
     """Pretty print tabular data."""
@@ -127,7 +129,8 @@ def show_build_profiles(ctx, output):
 @build.command()
 @click.pass_context
 @click.option('-p', '--preset', default='windows_default_client', help="Build profile to run.")
-def run_build(ctx, preset):
+@click.option('-archive', '--should_archive', type=bool, default=False, help="Archive.")
+def run_build(ctx, preset, should_archive):
     """ Runs a build for the configured build preset"""
 
     # TODO making it so that the run config is loaded in as a global argument and made available
@@ -138,6 +141,37 @@ def run_build(ctx, preset):
 
     builder = buildcommands.UnrealClientBuilder(run_config=run_config, build_config_name=preset) 
     builder.run()
+
+    # Creates an archive
+    if should_archive:
+        L.debug("Starting to archive")
+        build_root_directory = builder.get_archive_directory()
+        L.debug("Build Root: %s", build_root_directory)
+
+        # zip_file_path =
+        shutil.make_archive(build_root_directory, 'zip', build_root_directory)
+        L.debug("Removing build source since we are making an archive")
+        # Removing the original folder to only leave the archive
+        shutil.rmtree(build_root_directory)
+
+
+@build.group()
+def build_query(ctx, preset):
+    """ Shows information relevant to the builds"""
+    pass
+
+
+@build_query.command()
+@click.pass_context
+@click.option('-o', '--output', type=click.Choice(['text', 'json']), default='text', help="Output type.")
+def get_available_maps(ctx, output):
+
+    presets = {"Maps":"asdfasdf"}
+
+    if output == 'text':
+        print("\n".join(presets.keys()))
+    elif output == 'json':
+        print(json.dumps(presets, indent=4))
 
 
 @cli.group()
@@ -190,6 +224,11 @@ def refresh_asset_info(ctx):
 @cli.group()
 def run():
     """Run client builds under different configurations"""
+    pass
+
+@validate.command()
+@click.pass_context
+def show_test_profiles():
     pass
 
 
