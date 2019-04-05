@@ -2,6 +2,24 @@ import ue4_constants
 import pathlib
 
 
+def get_test_profiles(run_config):
+
+    build_structures = run_config[ue4_constants.UNREAL_BUILD_SETTINGS_STRUCTURE]
+    profiles = {}
+    for each in build_structures.keys():
+
+        each_build_profile = build_structures[each]
+
+        if "run_scripts" in each_build_profile.keys():
+            for each_test_name in each_build_profile["run_scripts"]:
+
+                if each not in profiles.keys():
+                    profiles[each] = []
+                profiles[each].append(each_test_name)
+
+    return profiles
+
+
 class UE4ClientUtilities:
 
     def __init__(self, run_config):

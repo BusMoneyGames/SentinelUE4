@@ -9,10 +9,10 @@ import shutil
 
 if __package__ is None or __package__ == '':
     from Editor import buildcommands, commandlets, packageinspection
-    from Game import clientrunner
+    from Game import clientrunner, clientutilities
 else:
     from . Editor import buildcommands, commandlets, packageinspection
-    from . Game import clientrunner
+    from . Game import clientrunner, clientutilities
 
 L = logging.getLogger()
 
@@ -215,8 +215,7 @@ def run_validation_task(ctx, task):
 @click.pass_context
 def refresh_asset_info(ctx):
     """ extracts raw information about assets"""
-
-    #TODO Handle the config overwrite
+    # TODO Handle the config overwrite
     run_config = ctx.obj['RUN_CONFIG']
     packageinspection.BasePackageInspection(run_config).run()
 
@@ -226,10 +225,19 @@ def run():
     """Run client builds under different configurations"""
     pass
 
-@validate.command()
+
+@run.command()
+@click.option('-o', '--output', type=click.Choice(['text', 'json']), default='text', help="Output type.")
 @click.pass_context
-def show_test_profiles():
-    pass
+def show_test_profiles(ctx, output):
+    """Lists profiles that can be run as tests"""
+    run_config = ctx.obj['RUN_CONFIG']
+    profiles = clientutilities.get_test_profiles(run_config)
+
+    if output == 'text':
+        print("\n".join(profiles.keys()))
+    elif output == 'json':
+        print(json.dumps(profiles, indent=4))
 
 
 if __name__ == "__main__":
