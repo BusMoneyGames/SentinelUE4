@@ -129,7 +129,7 @@ def show_build_profiles(ctx, output):
 @build.command()
 @click.pass_context
 @click.option('-p', '--preset', default='windows_default_client', help="Build profile to run.")
-@click.option('-archive', '--should_archive', type=bool, default=False, help="Archive.")
+@click.option('-archive', '--should_archive', type=bool, default=False, help="Should archive.")
 def run_build(ctx, preset, should_archive):
     """ Runs a build for the configured build preset"""
 
@@ -238,6 +238,48 @@ def show_test_profiles(ctx, output):
         print("\n".join(profiles.keys()))
     elif output == 'json':
         print(json.dumps(profiles, indent=4))
+
+@run.command()
+@click.option('--profile', default="", help="Output type.")
+@click.option('--test', default="", help="Output type.")
+@click.option('-o', '--output', type=click.Choice(['text', 'json']), default='text', help="Output type.")
+@click.pass_context
+def run_client(ctx, profile, test, output):
+
+    """Lists profiles that can be run as tests"""
+    run_config = ctx.obj['RUN_CONFIG']
+    available_profiles = clientutilities.get_test_profiles(run_config)
+
+    message_output = {"Available Tests": available_profiles}
+    valid_profile = False
+    valid_test = False
+
+    if not profile:
+        message_output["ProfileMessage"] = "--profile argument required"
+    elif profile not in available_profiles:
+        message_output["ProfileMessage"] = profile + " profile was not found"
+    else:
+        valid_profile = True
+
+    if not test:
+        message_output["TestMessage"] = "--test argument required..."
+    elif test not in available_profiles[profile]:
+        message_output["TestMessage"] = test + " is not an available test"
+    else:
+        valid_test = True
+
+    # If the arguments are correct
+    if valid_profile and valid_test:
+        message_output["Output"] = "Running build"
+        runner = clientrunner.GameClientRunner(run_config, profile, test)
+        runner.run()
+
+    else:
+        # Error messages
+        if output == 'text':
+            print("\n".join(message_output.keys()))
+        elif output == 'json':
+            print(json.dumps(message_output, indent=4))
 
 
 if __name__ == "__main__":

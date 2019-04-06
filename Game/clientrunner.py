@@ -10,16 +10,11 @@ else:
 
 class GameClientRunner:
     """Handles running game clients"""
-    def __init__(self, run_config, test_name = "default"):
+    def __init__(self, run_config, build_profile, test_name):
         self.test_name = test_name
         self.run_config = run_config
+
         self.client_utilities = clientutilities.UE4ClientUtilities(run_config)
-        self.run_startup_test()
 
-    def run_startup_test(self):
-        # TODO somehow get the test name better
-        builds = self.client_utilities.get_test_build_paths()
-
-        if self.test_name in builds:
-            pass
-
+    def run(self):
+        print("Running baby!")
