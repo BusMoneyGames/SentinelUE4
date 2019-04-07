@@ -1,8 +1,7 @@
-from SentinelUE4.Game.ClientOutput import CLIENT_LOG_CONSTANTS
+from .import CLIENT_LOG_CONSTANTS
+from . LogLines import GPUStatsLine, TextureStatLine, TextureOverviewStatLine
 
 import logging
-
-from SentinelUE4.Game.ClientOutput.LogLines import GPUStatsLine, TextureStatLine, TextureOverviewStatLine
 
 L = logging.getLogger()
 
@@ -35,6 +34,15 @@ class ClientTestEntryParser:
         self.screenshot_paths = []
         self.screenshot_types = []
         self.relative_image_paths = []
+
+    def get_formatted_data(self):
+        json_object = {"BaseName": self.base_name,
+                       "GPUData": self.raw_gpu_data,
+                       "TextureData": self.raw_texture_data,
+                       "Screenshots": self.get_test_screenshot_path()
+                       }
+
+        return json_object
 
     def _get_test_postfix(self) -> str:
         """
@@ -138,7 +146,6 @@ class ClientTestEntryParser:
     def _get_screenshot_type_from_path(self):
 
         return "Unit"
-
 
     def _extract_pattern_from_string(self, line, startletter, stopletter):
         """

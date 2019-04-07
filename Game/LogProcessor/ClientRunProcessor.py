@@ -1,9 +1,31 @@
 # coding=utf-8
-from SentinelUE4.Game.ClientOutput import CLIENT_LOG_CONSTANTS
-from SentinelUE4.Game.ClientOutput.ClientLogParser import ClientTestEntryParser
+from . import CLIENT_LOG_CONSTANTS
+from . ClientLogParser import ClientTestEntryParser
+import ue4_constants
 import pathlib
 import logging
 L = logging.getLogger()
+
+
+class ClientRunParser:
+
+    def __init__(self, run_config):
+        self.run_config = run_config
+        self.sentinel_internal_structure = self.run_config[ue4_constants.SENTINEL_PROJECT_STRUCTURE]
+        self.environment_config = self.run_config[ue4_constants.ENVIRONMENT_CATEGORY]
+
+        artifacts_root = pathlib.Path(self.environment_config[ue4_constants.SENTINEL_ARTIFACTS_ROOT_PATH])
+        client_run_cache = artifacts_root.joinpath(self.sentinel_internal_structure[ue4_constants.SENTINEL_CLIENT_RUN_CACHE])
+
+        for each_profile in client_run_cache.glob("*"):
+
+            for each_test in each_profile.glob("*"):
+                run_processor = ClientRunProcessor(pathlib.Path(each_test))
+                graphic_objects = run_processor.get_graphic_test_objects()
+
+                for each_obj in graphic_objects:
+                    import pprint
+                    pprint.pprint(each_obj.get_formatted_data())
 
 
 class ClientRunProcessor:

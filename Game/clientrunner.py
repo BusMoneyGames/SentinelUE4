@@ -87,7 +87,9 @@ class GameClientRunner:
         if target_dir.exists():
             shutil.rmtree(target_dir)
 
+        # Archives the raw output
         shutil.copytree(saved_folder, target_dir)
+
 
         # clean the build
         # TODO Clean the whole output folder
@@ -108,6 +110,3 @@ class GameClientRunner:
             import sys
             L.warning("Process exit with exit code: %s", popen.returncode)
             sys.exit(popen.returncode)
-
-
-

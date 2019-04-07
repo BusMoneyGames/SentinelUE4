@@ -10,9 +10,11 @@ import shutil
 if __package__ is None or __package__ == '':
     from Editor import buildcommands, commandlets, packageinspection
     from Game import clientrunner, clientutilities
+    from Game.LogProcessor import ClientRunProcessor
 else:
     from . Editor import buildcommands, commandlets, packageinspection
     from . Game import clientrunner, clientutilities
+    from . Game.LogProcessor import ClientRunProcessor
 
 L = logging.getLogger()
 
@@ -239,6 +241,7 @@ def show_test_profiles(ctx, output):
     elif output == 'json':
         print(json.dumps(profiles, indent=4))
 
+
 @run.command()
 @click.option('--profile', default="", help="Output type.")
 @click.option('--test', default="", help="Output type.")
@@ -281,6 +284,17 @@ def run_client(ctx, profile, test, output):
             print("\n".join(message_output.keys()))
         elif output == 'json':
             print(json.dumps(message_output, indent=4))
+
+
+@run.command()
+@click.option('-o', '--output', type=click.Choice(['text', 'json']), default='text', help="Output type.")
+@click.pass_context
+def process_client_results(ctx, output):
+
+    # Find the raw test folder
+    run_config = ctx.obj['RUN_CONFIG']
+
+    run_processor = ClientRunProcessor.ClientRunParser(run_config)
 
 
 if __name__ == "__main__":
