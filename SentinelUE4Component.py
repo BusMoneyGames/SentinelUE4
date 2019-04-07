@@ -272,7 +272,8 @@ def run_client(ctx, profile, test, output):
     if valid_profile and valid_test:
         message_output["Output"] = "Running build"
         runner = clientrunner.GameClientRunner(run_config, profile, test)
-        runner.run()
+        if runner.does_build_exist():
+            runner.run()
 
     else:
         # Error messages
