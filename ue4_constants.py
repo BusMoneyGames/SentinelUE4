@@ -29,6 +29,7 @@ SENTINEL_PROCESSED_PATH = "sentinel_processed_path"
 SENTINEL_BUILD_PATH = "sentinel_build_path"
 SENTINEL_DEFAULT_COOK_FILE_NAME = "sentinel_default_cook_log_name"
 SENTINEL_DEFAULT_COMPILE_FILE_NAME = "sentinel_default_editor_log_name"
+SENTINEL_CLIENT_RUN_CACHE = "sentinel_client_run_output"
 
 UNREAL_BUILD_SETTINGS_STRUCTURE = "buildconfigs"
 UNREAL_BUILD_PLATFORM_NAME = "build_platform"
