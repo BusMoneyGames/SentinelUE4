@@ -203,13 +203,18 @@ class UnrealEditorBuilder(BaseUnrealBuilder):
         :return:
         """
         if self.editor_component:
-            # Builds the editor component
+            # Only builds the component
             super(UnrealEditorBuilder, self).run()
         else:
             for i, each_component in enumerate(self.editor_components_to_build):
-                L.info("%s out of %s ", str(i), str(len(self.editor_components_to_build)))
+                L.info("%s out of %s ", str(i + 1), str(len(self.editor_components_to_build)))
                 L.info("Building Editor Component: %s", each_component)
                 UnrealEditorBuilder(self.run_config, editor_component=each_component).run()
+
+            # Builds the actual editor after all the components have been built
+            L.debug("Starting editor build")
+            super(UnrealEditorBuilder, self).run()
+
 
 
 class UnrealClientBuilder(BaseUnrealBuilder):
