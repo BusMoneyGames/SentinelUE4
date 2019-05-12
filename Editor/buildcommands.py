@@ -1,17 +1,45 @@
 # coding=utf-8
+import sys
 import subprocess
 import os
 import logging
 import ue4_constants
 import pathlib
+from unittest.mock import MagicMock
 
-if __package__ is None or __package__ == '':
-    import editorutilities as editorUtilities
-else:
-    from . import editorutilities as editorUtilities
-
+from . import editorutilities as editorUtilities
 
 L = logging.getLogger(__name__)
+
+
+class BuilderFactory:
+    def __init__(self, run_config, build_config_name=""):
+
+        self.run_config = run_config
+
+        # TODO deal with it if there is no build config
+        self.build_config_name = build_config_name
+        self.should_mock = False
+
+    def get_builder(self, builder_type):
+
+        if builder_type == "Editor":
+            builder = UnrealEditorBuilder(run_config=self.run_config)
+
+        elif builder_type == "Client":
+            # Create the builder
+            builder = UnrealClientBuilder(run_config=self.run_config, build_config_name=self.build_config_name)
+
+            if self.should_mock:
+                mock_builder = MagicMock(builder)
+                mock_builder.run.return_value = {"output_director": "fudge"}
+                builder = mock_builder
+        else:
+            L.error("No builder of the type: %s", builder_type)
+            builder = None
+            sys.exit(4)
+
+        return builder
 
 
 class BaseUnrealBuilder:
@@ -19,27 +47,20 @@ class BaseUnrealBuilder:
     Base class for triggering builds for an unreal engine project
     """
 
-    def __init__(self, run_config, build_config_name="windows_default_client"):
+    def __init__(self, run_config, platform="Win64"):
 
-        """
-        :param unreal_project_info:
-        """
+        # prepare needs to be explicitly called for the build to start
+        self.is_prepared = False
 
         self.run_config = run_config
+        self.platform = platform
+
+        self.editor_util = editorUtilities.UE4EditorUtilities(run_config, self.platform)
+
         self.environment_structure = self.run_config[ue4_constants.ENVIRONMENT_CATEGORY]
         self.all_build_settings = self.run_config[ue4_constants.UNREAL_BUILD_SETTINGS_STRUCTURE]
 
-        print(self.all_build_settings)
-
-        # TODO Add logic to be able to switch the build settings
-        self.build_config_name = build_config_name
-        self.build_settings = self.all_build_settings[self.build_config_name]
-
-        self.platform = self.build_settings[ue4_constants.UNREAL_BUILD_PLATFORM_NAME]
-        self.editor_util = editorUtilities.UE4EditorUtilities(run_config, self.platform)
-
         self.project_root_path = pathlib.Path(self.environment_structure[ue4_constants.UNREAL_PROJECT_ROOT])
-
         self.sentinel_project_structure = self.run_config[ue4_constants.SENTINEL_PROJECT_STRUCTURE]
 
         sentinel_root = pathlib.Path(self.environment_structure[ue4_constants.SENTINEL_ARTIFACTS_ROOT_PATH])
@@ -48,6 +69,23 @@ class BaseUnrealBuilder:
         self.log_output_folder = sentinel_root.joinpath(sentinel_logs_path)
 
         self.log_output_file_name = "Default_Log.log"
+
+    def prepare(self):
+        """
+        Initializes the environment before the build starts
+
+        :return:
+        """
+
+        # Prepare the log output file
+        # Prepare the build meta data file
+
+        self.is_prepared = True
+
+        return {
+            "Log_Location": "adfasdf",
+            "Meta Data File": "123156"
+        }
 
     @staticmethod
     def _prefix_config_with_dash(list_of_strings):
@@ -102,43 +140,29 @@ class BaseUnrealBuilder:
             sys.exit(popen.returncode)
 
 
-class EditorComponentBuilder(BaseUnrealBuilder):
-
-    def __init__(self, run_config, component_name="ShaderCompileWorker"):
-        self.component_name = component_name
-        super(EditorComponentBuilder, self).__init__(run_config, build_config_name="windows_default_client")
-
-    def get_build_command(self):
-
-        unreal_build_tool_path = self.editor_util.get_unreal_build_tool_path()
-
-        cmd_list = [str(unreal_build_tool_path),
-                    # self.unreal_project_info.get_project_name(),
-                    "Development",  # The editor build is always development
-                    self.platform,
-                    self.component_name
-                    ]
-
-        cmd = " ".join(cmd_list)
-        L.debug("Build command: %s", cmd)
-
-        return cmd
-
-
 class UnrealEditorBuilder(BaseUnrealBuilder):
 
     """
     Handle building the unreal editor binaries for the game project
     """
 
-    def __init__(self, run_config):
+    def __init__(self, run_config, editor_component=""):
         """
         Uses the settings from the path object to compile the editor binaries for the project
         so that we can run a client build or commandlets
-        :param unreal_project_info:
         """
 
+        self.editor_component = editor_component
+
         super().__init__(run_config)
+        self.editor_compile_settings = run_config[ue4_constants.UNREAL_EDITOR_COMPILE_CONFIGURATION]
+
+        L.debug("Available editor compile targets: ")
+        L.debug(", ".join(self.editor_compile_settings.keys()))
+
+        # TODO Support other platforms
+        self.platform_compile_settings = self.editor_compile_settings["windows"]
+        self.editor_components_to_build = self.platform_compile_settings["components"]
 
         self.log_output_file_name = self.sentinel_project_structure[ue4_constants.SENTINEL_DEFAULT_COMPILE_FILE_NAME]
 
@@ -148,21 +172,24 @@ class UnrealEditorBuilder(BaseUnrealBuilder):
         :return: build command
         """
 
-        project_path = "-project=" + "\"" + str(self.editor_util.get_project_file_path()) + "\""
+        if self.editor_component:
+            build_target = self.editor_component
+        else:
+            # If no editor component is passed in we build the project
+            build_target = "-project=" + "\"" + str(self.editor_util.get_project_file_path()) + "\""
 
-        # TODO after upgrading to 4.20 then I need to skip the project name to be able to compile the editor
-        unreal_build_tool_path = self.editor_util.get_unreal_build_tool_path()
+        unreal_build_tool_path = str(self.editor_util.get_unreal_build_tool_path())
 
-        cmd_list = [str(unreal_build_tool_path),
-                    #self.unreal_project_info.get_project_name(),
+        cmd_list = [unreal_build_tool_path,
                     "Development",  # The editor build is always development
                     self.platform,
-                    project_path,
+                    build_target,
                     ]
 
-        # Adding the compile flags at the end of the settings
-        compile_flags = self._prefix_config_with_dash(self.build_settings[ue4_constants.UNREAL_EDITOR_COMPILE_FLAGS])
-        cmd_list.extend(compile_flags)
+        # Adds teh actual editor compile flags if we are doing a full compile
+        if not self.editor_component:
+            compile_flags = self._prefix_config_with_dash(self.platform_compile_settings["editor_compile_flags"])
+            cmd_list.extend(compile_flags)
 
         cmd = " ".join(cmd_list)
         L.debug("Build command: %s", cmd)
@@ -170,8 +197,19 @@ class UnrealEditorBuilder(BaseUnrealBuilder):
         return cmd
 
     def run(self):
-        # Editor Compile
-        super(UnrealEditorBuilder, self).run()
+        """
+        If there are editor components ( shader compiler for example ) configured then we iterate through them first
+        and build.  if there is no editor component then we build the editor directly
+        :return:
+        """
+        if self.editor_component:
+            # Builds the editor component
+            super(UnrealEditorBuilder, self).run()
+        else:
+            for i, each_component in enumerate(self.editor_components_to_build):
+                L.info("%s out of %s ", str(i), str(len(self.editor_components_to_build)))
+                L.info("Building Editor Component: %s", each_component)
+                UnrealEditorBuilder(self.run_config, editor_component=each_component).run()
 
 
 class UnrealClientBuilder(BaseUnrealBuilder):
@@ -181,15 +219,20 @@ class UnrealClientBuilder(BaseUnrealBuilder):
     """
 
     def __init__(self, run_config, build_config_name="windows_default_client"):
+
         """
         Use the settings from the path object to build the client based on the settings in the settings folder
-        :param unreal_project_info:
         """
 
-        super().__init__(run_config, build_config_name)
+        super().__init__(run_config)
+
+        # TODO Add logic to be able to switch the build settings
+        self.build_config_name = build_config_name
+        self.build_settings = self.all_build_settings[self.build_config_name]
+
+        self.platform = self.build_settings[ue4_constants.UNREAL_BUILD_PLATFORM_NAME]
 
         self.log_output_file_name = self.sentinel_project_structure[ue4_constants.SENTINEL_DEFAULT_COOK_FILE_NAME]
-        self.editor_util = editorUtilities.UE4EditorUtilities(run_config, self.platform)
 
     def get_archive_directory(self):
 
@@ -265,10 +308,6 @@ class UnrealClientBuilder(BaseUnrealBuilder):
         if self.build_settings["should_compile"]:
             editor_builder = UnrealEditorBuilder(self.run_config)
             editor_builder.run()
-
-            # TODO Move this over to a config
-            EditorComponentBuilder(self.run_config, component_name="ShaderCompileWorker").run()
-            EditorComponentBuilder(self.run_config, component_name="UnrealLightmass").run()
 
         super(UnrealClientBuilder, self).run()
 

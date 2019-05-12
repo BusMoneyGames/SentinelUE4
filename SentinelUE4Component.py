@@ -4,47 +4,13 @@ import logging
 import os
 import click
 import ue4_constants
-from click import echo, secho
 import shutil
 
-if __package__ is None or __package__ == '':
-    from Editor import buildcommands, commandlets, packageinspection
-    from Game import clientrunner, clientutilities
-    from Game.LogProcessor import ClientRunProcessor
-else:
-    from . Editor import buildcommands, commandlets, packageinspection
-    from . Game import clientrunner, clientutilities
-    from . Game.LogProcessor import ClientRunProcessor
+from Editor import buildcommands, commandlets, packageinspection
+from Game import clientrunner, clientutilities
+from Game.LogProcessor import ClientRunProcessor
 
 L = logging.getLogger()
-
-
-def tabulate(headers, rows, indent=None, col_padding=None):
-    """Pretty print tabular data."""
-    indent = indent or ''
-    col_padding = col_padding or 3
-
-    # Calculate max width for each column
-    col_size = [[len(h) for h in headers]]  # Width of header cols
-    col_size += [[len(str(row.get(h, ''))) for h in headers] for row in rows]  # Width of col in each row
-    col_size = [max(col) for col in zip(*col_size)]  # Find the largest
-
-    # Sort rows
-    def make_key(row):
-        return ":".join([str(row.get(k, '')) for k in headers])
-
-    rows = sorted(rows, key=make_key)
-
-    for row in [headers] + rows:
-        echo(indent, nl=False)
-        for h, width in zip(headers, col_size):
-            if row == headers:
-                h = h.replace('_', ' ').title()  # Make header name pretty
-                secho(h.ljust(width + col_padding), bold=True, nl=False)
-            else:
-                fg = 'black' if row.get('active', True) else 'white'
-                secho(str(row.get(h, '')).ljust(width + col_padding), nl=False, fg=fg)
-        echo()
 
 
 def _read_config(path):
@@ -132,7 +98,7 @@ def show_build_profiles(ctx, output):
 @click.pass_context
 @click.option('-p', '--preset', default='windows_default_client', help="Build profile to run.")
 @click.option('-archive', '--should_archive', type=bool, default=False, help="Should archive.")
-def run_build(ctx, preset, should_archive):
+def client(ctx, preset, should_archive):
     """ Runs a build for the configured build preset"""
 
     # TODO making it so that the run config is loaded in as a global argument and made available
@@ -141,9 +107,13 @@ def run_build(ctx, preset, should_archive):
     run_config = ctx.obj['RUN_CONFIG']
     L.debug("Available Builds: %s", "".join(get_default_build_presets(run_config)))
 
-    builder = buildcommands.UnrealClientBuilder(run_config=run_config, build_config_name=preset) 
-    builder.run()
+    factory = buildcommands.BuilderFactory(run_config=run_config, build_config_name=preset)
+    builder = factory.get_builder("Client")
 
+    builder.prepare()
+    a = builder.run()
+
+    print(a)
     # Creates an archive
     if should_archive:
         L.debug("Starting to archive")
@@ -156,6 +126,18 @@ def run_build(ctx, preset, should_archive):
         # Removing the original folder to only leave the archive
         shutil.rmtree(build_root_directory)
 
+
+@build.command()
+@click.pass_context
+@click.option('-p', '--platform', default='windows', help="platform to run the editor on")
+def editor(ctx, platform):
+
+    run_config = ctx.obj['RUN_CONFIG']
+    factory = buildcommands.BuilderFactory(run_config=run_config)
+    builder = factory.get_builder("Editor")
+
+    builder.prepare()
+    builder.run()
 
 @build.group()
 def build_query(ctx, preset):

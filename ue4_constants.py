@@ -21,6 +21,7 @@ UNREAL_ENGINE_UBT_EXE = "unreal_build_tool_path"
 UNREAL_PROJECT_STRUCTURE = "unreal_project_structure"
 UNREAL_CONTENT_ROOT_PATH = "content_root_path"
 
+
 SENTINEL_PROJECT_STRUCTURE = "sentinel_internal_structure"
 SENTINEL_PROJECT_NAME = "sentinel_project_name"
 SENTINEL_RAW_LOGS_PATH = "sentinel_raw_logs_path"
@@ -36,6 +37,6 @@ UNREAL_BUILD_PLATFORM_NAME = "build_platform"
 UNREAL_BUILD_COMMAND_NAME = "build_command"
 UNREAL_BUILD_CONFIG_FLAGS = "build_flags"
 UNREAL_BUILD_CONFIGURATION = "build_configuration"
-UNREAL_EDITOR_COMPILE_FLAGS = "editor_compile_flags"
+UNREAL_EDITOR_COMPILE_CONFIGURATION = "editorbuildconfig"
 
 
