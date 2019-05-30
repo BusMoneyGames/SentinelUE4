@@ -113,7 +113,6 @@ def client(ctx, preset, should_archive):
     builder.prepare()
     a = builder.run()
 
-    print(a)
     # Creates an archive
     if should_archive:
         L.debug("Starting to archive")
