@@ -42,8 +42,9 @@ def get_validate_presets(default_run_config):
 @click.group()
 @click.option('--path', default="", help="path to the config overwrite folder")
 @click.option('--debug', default=False, help="Turns on debug messages")
+@click.option('--output', type=click.Choice(['text', 'json']), default='text', help="Output type.")
 @click.pass_context
-def cli(ctx, path, debug):
+def cli(ctx, path, debug, output):
     """Sentinel Unreal Component handles running commands interacting with unreal engine"""
 
     if debug:
@@ -73,6 +74,7 @@ def cli(ctx, path, debug):
     ctx.obj['CONFIG_ROOT'] = path
     ctx.obj['GENERATED_CONFIG_PATH'] = config_file_path
     ctx.obj['RUN_CONFIG'] = _read_config(config_file_path)
+    ctx.obj['OUTPUT_TYPE'] = output
 
 
 @cli.group()
@@ -81,16 +83,15 @@ def build():
 
 
 @build.command()
-@click.option('-o', '--output', type=click.Choice(['text', 'json']), default='text', help="Output type.")
 @click.pass_context
-def show_build_profiles(ctx, output):
-    """ Lists the available build profiles as defined in settings"""
+def list_build_profiles(ctx):
+    """ Lists the available build profiles"""
     run_config = ctx.obj['RUN_CONFIG']
     presets = get_default_build_presets(run_config)
     
-    if output == 'text':
+    if ctx.obj['OUTPUT_TYPE'] == 'text':
         print("\n".join(presets.keys()))
-    elif output == 'json':
+    elif ctx.obj['OUTPUT_TYPE'] == 'json':
         print(json.dumps(presets, indent=4))
 
 
@@ -99,7 +100,7 @@ def show_build_profiles(ctx, output):
 @click.option('-p', '--preset', default='windows_default_client', help="Build profile to run.")
 @click.option('-archive', '--should_archive', type=bool, default=False, help="Should archive.")
 def client(ctx, preset, should_archive):
-    """ Runs a build for the configured build preset"""
+    """ Builds client based on profile"""
 
     # TODO making it so that the run config is loaded in as a global argument and made available
     # to all steps
@@ -128,9 +129,8 @@ def client(ctx, preset, should_archive):
 
 @build.command()
 @click.pass_context
-@click.option('-p', '--platform', default='windows', help="platform to run the editor on")
-def editor(ctx, platform):
-
+def editor(ctx):
+    """Builds editor based on profile"""
     run_config = ctx.obj['RUN_CONFIG']
     factory = buildcommands.BuilderFactory(run_config=run_config)
     builder = factory.get_builder("Editor")
@@ -138,50 +138,31 @@ def editor(ctx, platform):
     builder.prepare()
     builder.run()
 
-@build.group()
-def build_query(ctx, preset):
-    """ Shows information relevant to the builds"""
-    pass
-
-
-@build_query.command()
-@click.pass_context
-@click.option('-o', '--output', type=click.Choice(['text', 'json']), default='text', help="Output type.")
-def get_available_maps(ctx, output):
-
-    presets = {"Maps":"asdfasdf"}
-
-    if output == 'text':
-        print("\n".join(presets.keys()))
-    elif output == 'json':
-        print(json.dumps(presets, indent=4))
-
 
 @cli.group()
-def validate():
+def project():
     """validate and extract project infrastructure information"""
 
 
-@validate.command()
+@project.command()
 @click.pass_context
-@click.option('-o', '--output', type=click.Choice(['text', 'json']), default='text', help="Output type.")
-def show_validate_profiles(ctx, output):
+def show_validate_profiles(ctx):
     """ output validation profiles"""
     run_config = ctx.obj['RUN_CONFIG']
 
     presets = get_validate_presets(run_config)
 
-    if output == 'text':
+    if ctx.obj['OUTPUT_TYPE'] == 'text':
         print("\n".join(presets.keys()))
-    elif output == 'json':
+    elif ctx.obj['OUTPUT_TYPE'] == 'json':
         print(json.dumps(presets, indent=4))
 
 
-@validate.command()
+@project.command()
 @click.pass_context
 @click.option('-o', '--task', help="Output type.")
-def run_validation_task(ctx, task):
-    """ Runs a validation task """
+def run_project_task(ctx, task):
+    """ Project tasks """
 
     # TODO Handle the config overwrite
     run_config = ctx.obj['RUN_CONFIG']
@@ -194,7 +175,7 @@ def run_validation_task(ctx, task):
         commandlet.run()
 
 
-@validate.command()
+@project.command()
 @click.pass_context
 def refresh_asset_info(ctx):
     """ extracts raw information about assets"""
@@ -205,30 +186,28 @@ def refresh_asset_info(ctx):
 
 @cli.group()
 def run():
-    """Run client builds under different configurations"""
+    """Run clients"""
     pass
 
 
 @run.command()
-@click.option('-o', '--output', type=click.Choice(['text', 'json']), default='text', help="Output type.")
 @click.pass_context
-def show_test_profiles(ctx, output):
-    """Lists profiles that can be run as tests"""
+def list_test_profiles(ctx):
+    """Available test profiles"""
     run_config = ctx.obj['RUN_CONFIG']
     profiles = clientutilities.get_test_profiles(run_config)
 
-    if output == 'text':
+    if ctx.obj['OUTPUT_TYPE'] == 'text':
         print("\n".join(profiles.keys()))
-    elif output == 'json':
+    elif ctx.obj['OUTPUT_TYPE'] == 'json':
         print(json.dumps(profiles, indent=4))
 
 
 @run.command()
 @click.option('--profile', default="", help="Output type.")
 @click.option('--test', default="", help="Output type.")
-@click.option('-o', '--output', type=click.Choice(['text', 'json']), default='text', help="Output type.")
 @click.pass_context
-def run_client(ctx, profile, test, output):
+def run_client(ctx, profile, test):
 
     """Lists profiles that can be run as tests"""
     run_config = ctx.obj['RUN_CONFIG']
@@ -261,16 +240,15 @@ def run_client(ctx, profile, test, output):
 
     else:
         # Error messages
-        if output == 'text':
+        if ctx.obj['OUTPUT_TYPE'] == 'text':
             print("\n".join(message_output.keys()))
-        elif output == 'json':
+        elif ctx.obj['OUTPUT_TYPE'] == 'json':
             print(json.dumps(message_output, indent=4))
 
 
 @run.command()
-@click.option('-o', '--output', type=click.Choice(['text', 'json']), default='text', help="Output type.")
 @click.pass_context
-def process_client_results(ctx, output):
+def process_client_results(ctx):
 
     # Find the raw test folder
     run_config = ctx.obj['RUN_CONFIG']
