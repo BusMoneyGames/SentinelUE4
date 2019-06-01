@@ -155,7 +155,17 @@ class PkgLogObject:
         return package_info
 
     def get_package_references(self):
-        return {}
+
+        package_ref = {}
+        package_info_chapter = self._get_chapter_from_first_line("Packages referenced by ")
+
+        for each_line in package_info_chapter:
+            each_line = each_line.lstrip().rstrip()
+            line_split = each_line.split(") ")
+            if line_split[0].isnumeric():
+                package_ref[line_split[0]] = line_split[1]
+
+        return package_ref
 
     def get_asset_type(self):
         asset_reference_chapter = self._get_chapter_from_first_line("Asset Registry Size: ")
@@ -595,3 +605,11 @@ class AssetRegistryParserObject(BaseDataParser):
             data_dict[each_import_data_key] = each_import_data_value
 
         return data_dict
+
+
+path = r"D:\Work\DirectiveGames\drift-mmo-plugin-client\SentinelArtifacts\Raw\_Cache\00d01d1345a67534f2bcce9c0d4d660c\SM_Wep_Tongs_01_StaticMesh.log"
+a = PkgLogObject(path)
+data = a.get_data()
+
+import pprint
+pprint.pprint(data)
