@@ -605,11 +605,3 @@ class AssetRegistryParserObject(BaseDataParser):
             data_dict[each_import_data_key] = each_import_data_value
 
         return data_dict
-
-
-path = r"D:\Work\DirectiveGames\drift-mmo-plugin-client\SentinelArtifacts\Raw\_Cache\00d01d1345a67534f2bcce9c0d4d660c\SM_Wep_Tongs_01_StaticMesh.log"
-a = PkgLogObject(path)
-data = a.get_data()
-
-import pprint
-pprint.pprint(data)
