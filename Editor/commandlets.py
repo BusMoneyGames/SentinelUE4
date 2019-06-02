@@ -52,6 +52,8 @@ class BaseUE4Commandlet:
 
         self.raw_log_path = self.project_root_path.joinpath(self.environment_config[
                                                                 ue4_constants.SENTINEL_ARTIFACTS_ROOT_PATH])
+
+        self.temp_extract_path = self.environment_config["version_control_root"]
         self.raw_log_path = self.raw_log_path.resolve()
 
         # Information about the relative structure of ue4
@@ -226,7 +228,7 @@ class PackageInfoCommandlet(BaseUE4Commandlet):
 
         L.debug(commandlet_command)
 
-        temp_dump_file = os.path.join(self.raw_log_path, "temp", "_tempDump.log")
+        temp_dump_file = os.path.join(self.temp_extract_path, "temp", "_tempDump.log")
         L.debug(temp_dump_file)
 
         if not os.path.exists(os.path.dirname(temp_dump_file)):
@@ -238,7 +240,7 @@ class PackageInfoCommandlet(BaseUE4Commandlet):
         self.split_temp_log_into_raw_files(temp_dump_file)
 
         # Deleting the temp file and folder
-        # shutil.rmtree(os.path.dirname(temp_dump_file))
+        shutil.rmtree(os.path.dirname(temp_dump_file))
 
     def _register_log_path(self, path):
         self.generated_logs.append(path)
