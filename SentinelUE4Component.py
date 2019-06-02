@@ -1,7 +1,6 @@
-import pathlib
 import json
+import pathlib
 import logging
-import os
 import click
 import ue4_constants
 import shutil
@@ -40,11 +39,11 @@ def get_validate_presets(default_run_config):
 
 
 @click.group()
-@click.option('--path', default="", help="path to the config overwrite folder")
+@click.option('--project_root', default="", help="path to the config overwrite folder")
 @click.option('--debug', default=False, help="Turns on debug messages")
 @click.option('--output', type=click.Choice(['text', 'json']), default='text', help="Output type.")
 @click.pass_context
-def cli(ctx, path, debug, output):
+def cli(ctx, project_root, debug, output):
     """Sentinel Unreal Component handles running commands interacting with unreal engine"""
 
     if debug:
@@ -55,25 +54,12 @@ def cli(ctx, path, debug, output):
         L.setLevel(logging.ERROR)
 
     logging.basicConfig(format=message_format)
-    run_directory = pathlib.Path(os.getcwd())
 
-    if path:
-        custom_path = pathlib.Path(path)
-        if custom_path.absolute():
-            config_file_root_dir = path
-        else:
-            config_file_root_dir = run_directory.joinpath(path)
-    else:
-        # Default is one level up from current directory
-        config_file_root_dir = run_directory.parent
-
-    config_file_path = config_file_root_dir.joinpath(ue4_constants.GENERATED_CONFIG_FILE_NAME)
-    L.debug("Reading config file from: %s Exists: %s", config_file_path, config_file_path.exists())
+    config_path = pathlib.Path(project_root).joinpath("_generated_sentinel_config.json")
 
     ctx.ensure_object(dict)
-    ctx.obj['CONFIG_ROOT'] = path
-    ctx.obj['GENERATED_CONFIG_PATH'] = config_file_path
-    ctx.obj['RUN_CONFIG'] = _read_config(config_file_path)
+    ctx.obj['GENERATED_CONFIG_PATH'] = project_root
+    ctx.obj['RUN_CONFIG'] = _read_config(config_path)
     ctx.obj['OUTPUT_TYPE'] = output
 
 
