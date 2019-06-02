@@ -327,6 +327,7 @@ class BasePackageInspection:
 
             generated_logs = package_info_run_object.get_generated_logs()
             self.convert_to_json(generated_logs)
+
             self._process_generated_logs(generated_logs)
 
     def convert_to_json(self, generated_logs):

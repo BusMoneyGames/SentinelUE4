@@ -53,7 +53,6 @@ class BaseUE4Commandlet:
         self.raw_log_path = self.project_root_path.joinpath(self.environment_config[
                                                                 ue4_constants.SENTINEL_ARTIFACTS_ROOT_PATH])
 
-        self.temp_extract_path = self.environment_config["version_control_root"]
         self.raw_log_path = self.raw_log_path.resolve()
 
         # Information about the relative structure of ue4
@@ -196,6 +195,8 @@ class PackageInfoCommandlet(BaseUE4Commandlet):
         # Initializes the object
         super().__init__(run_config, "_PkgInfoCommandlet", files=unreal_asset_file_paths)
 
+        self.temp_extract_path = pathlib.Path(self.environment_config["version_control_root"]).joinpath( "temp")
+
         self.unreal_asset_file_paths = unreal_asset_file_paths
         self.asset_type = asset_type
         self.generated_logs = []
@@ -228,7 +229,7 @@ class PackageInfoCommandlet(BaseUE4Commandlet):
 
         L.debug(commandlet_command)
 
-        temp_dump_file = os.path.join(self.temp_extract_path, "temp", "_tempDump.log")
+        temp_dump_file = os.path.join(self.temp_extract_path, "_tempDump.log")
         L.debug(temp_dump_file)
 
         if not os.path.exists(os.path.dirname(temp_dump_file)):
@@ -240,7 +241,7 @@ class PackageInfoCommandlet(BaseUE4Commandlet):
         self.split_temp_log_into_raw_files(temp_dump_file)
 
         # Deleting the temp file and folder
-        shutil.rmtree(os.path.dirname(temp_dump_file))
+        # shutil.rmtree(os.path.dirname(temp_dump_file))
 
     def _register_log_path(self, path):
         self.generated_logs.append(path)
@@ -264,7 +265,7 @@ class PackageInfoCommandlet(BaseUE4Commandlet):
 
                     asset_name = self.get_asset_name_from_summary_line(line)
                     path = self.get_out_log_path(asset_name)
-
+                    print(path)
                     self._register_log_path(path)
 
                     if not out_log:
@@ -296,7 +297,7 @@ class PackageInfoCommandlet(BaseUE4Commandlet):
         """
 
         asset_file_name = asset_name + "_" + self.asset_type + ".log"
-        path = pathlib.Path(self.raw_log_path).joinpath(asset_file_name)
+        path = pathlib.Path(self.temp_extract_path).joinpath(asset_file_name)
 
         return path
 
