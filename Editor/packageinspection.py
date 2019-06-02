@@ -5,13 +5,11 @@ import logging
 import os
 import pathlib
 import shutil
-
 import ue4_constants
 
-if __package__ is None or __package__ == '':
-    import commandlets, editorutilities, LogProcesser
-else:
-    from . import commandlets, editorutilities, LogProcesser
+import Editor.LogProcesser.packageinfolog as PackageInfoLog
+from . import commandlets, editorutilities, LogProcesser
+
 
 
 L = logging.getLogger(__name__)
@@ -328,8 +326,20 @@ class BasePackageInspection:
             package_info_run_object.run()
 
             generated_logs = package_info_run_object.get_generated_logs()
-
+            self.convert_to_json(generated_logs)
             self._process_generated_logs(generated_logs)
+
+    def convert_to_json(self, generated_logs):
+
+        for each_generated_log in generated_logs:
+            log = PackageInfoLog.PkgLogObject(each_generated_log)
+            data = log.get_data()
+            name = pathlib.Path(each_generated_log).name
+
+            path = self.processed_path.joinpath(name + ".json")
+
+            with open(path, 'w') as outfile:
+                json.dump(data, outfile,indent=4)
 
     def _process_generated_logs(self, generated_logs):
 
