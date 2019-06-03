@@ -11,7 +11,6 @@ import Editor.LogProcesser.packageinfolog as PackageInfoLog
 from . import commandlets, editorutilities, LogProcesser
 
 
-
 L = logging.getLogger(__name__)
 
 
