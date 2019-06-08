@@ -5,10 +5,11 @@ import logging
 import os
 import pathlib
 import shutil
-import ue4_constants
+import subprocess
 
+import ue4_constants
 import Editor.LogProcesser.packageinfolog as PackageInfoLog
-from . import commandlets, editorutilities, LogProcesser
+from Editor import commandlets, editorutilities
 
 
 L = logging.getLogger(__name__)
@@ -307,7 +308,7 @@ class BasePackageInspection:
         # TODO deals the case where the user deletes files
         for i, each_chunk in enumerate(chunks_of_files_to_process):
 
-            package_info_run_object = commandlets.PackageInfoCommandlet(
+            package_info_run_object = PackageInfoCommandlet(
                 self.run_config,
                 each_chunk,
                 asset_types
@@ -489,63 +490,141 @@ def get_asset_type_from_log_file(log_file_path):
     return asset_type
 
 
-class ProcessPackageInfo:
+class PackageInfoCommandlet(commandlets.BaseUE4Commandlet):
+    """ Runs the package info commandlet """
+    def __init__(self, run_config, unreal_asset_file_paths, asset_type="Default"):
 
-    def __init__(self, run_config):
+        # Initializes the object
+        super().__init__(run_config, "_PkgInfoCommandlet", files=unreal_asset_file_paths)
 
-        self.run_config = run_config
-        self.environment_config = run_config[ue4_constants.ENVIRONMENT_CATEGORY]
-        self.sentinel_structure = run_config[ue4_constants.SENTINEL_PROJECT_STRUCTURE]
-        self._construct_paths()
+        self.temp_extract_path = pathlib.Path(self.environment_config["version_control_root"]).joinpath( "temp")
 
-        self.pkg_extractor = BasePackageInspection(run_config)
+        self.unreal_asset_file_paths = unreal_asset_file_paths
+        self.asset_type = asset_type
+        self.generated_logs = []
 
-    def _construct_paths(self):
-        """Makes the paths for outputs inside of the root artifact folder"""
+    def has_custom_type_config(self):
 
-        self.sentinel_root = self.environment_config[ue4_constants.SENTINEL_ARTIFACTS_ROOT_PATH]
-        self.archive_folder_path = self.sentinel_root.joinpath(self.sentinel_structure[
-                                                                   ue4_constants.SENTINEL_CACHE_ROOT]).resolve()
-        self.raw_data_dir = self.sentinel_root.joinpath(self.sentinel_structure[
-                                                            ue4_constants.SENTINEL_RAW_LOGS_PATH]).resolve()
-        self.processed_path = self.sentinel_root.joinpath(self.sentinel_structure[
-                                                              ue4_constants.SENTINEL_PROCESSED_PATH]).resolve()
+        # The default asset type is always valid
+        if self.asset_type == "Default":
+            return True
 
-        if not self.archive_folder_path.exists():
-            os.makedirs(self.archive_folder_path)
-        if not self.raw_data_dir.exists():
-            os.makedirs(self.raw_data_dir)
-        if not self.processed_path.exists():
-            os.makedirs(self.processed_path)
+        return self.asset_type in self.commandlet_settings["detail_extract_types"]
+
+    def get_commandlet_flags(self):
+
+        # The Default asset type just used the default flags
+        if self.asset_type == "Default":
+            return super(PackageInfoCommandlet, self).get_commandlet_flags()
+
+        commandlet_flags = self.commandlet_settings["detailed_extract"]
+
+        return commandlet_flags
 
     def run(self):
         """
-        Goes through all the raw extracted files and extracts any data of interest out of it.  The data of interest is then
-        Saved as a json file
-
-        # Find the sentinel output folder
-        # Find the test folder
-        # Iterate through all the raw package data files
-        # Convert each raw file to json file
-        # Move files to the parsed folder
-
+        Prepares and runs the Package info commandlet
+        :return: path to the log file
         """
 
-        self.pkg_extractor.run()
+        commandlet_command = self.get_command()
 
-        # Goes through each raw file and saves it out as a json file
-        for each_raw_file_path in self.raw_data_dir.glob("**/*.log"):
-            # Create the pkg object
-            each_pkg_obj = packageinfolog.PkgLogObject(each_raw_file_path)
-            # Gets the name of the asset
-            asset_name = each_pkg_obj.get_asset_name()
+        L.debug(commandlet_command)
 
-            # Save single json file
-            path = os.path.join(self.processed_path, asset_name + ".json")
+        temp_dump_file = os.path.join(self.temp_extract_path, "_tempDump.log")
+        L.debug(temp_dump_file)
 
-            f = open(path, 'w')
-            # Saves the package object data to disk
-            json.dump(each_pkg_obj.get_data(), f, indent=4)
-            f.close()
+        if not os.path.exists(os.path.dirname(temp_dump_file)):
+            os.makedirs(os.path.dirname(temp_dump_file))
 
-            L.debug("Wrote: " + str(path))
+        with open(temp_dump_file, "w", encoding='utf-8', errors="ignore") as temp_out:
+            subprocess.run(commandlet_command, stdout=temp_out, stderr=subprocess.STDOUT)
+
+        self.split_temp_log_into_raw_files(temp_dump_file)
+
+        # Deleting the temp file and folder
+        # shutil.rmtree(os.path.dirname(temp_dump_file))
+
+    def _register_log_path(self, path):
+        self.generated_logs.append(path)
+
+    def get_generated_logs(self):
+        return self.generated_logs
+
+    def split_temp_log_into_raw_files(self, temp_log_path):
+
+        """
+        Split the temp file into smaller pieces in the raw folder
+        :param temp_log_path:
+        :return:
+        """
+
+        out_log = None
+
+        with io.open(temp_log_path, encoding='utf-8', errors="ignore") as infile:
+            for i, line in enumerate(infile):
+                if self.is_start_of_package_summary(line):
+
+                    asset_name = self.get_asset_name_from_summary_line(line)
+                    path = self.get_out_log_path(asset_name)
+                    print(path)
+                    self._register_log_path(path)
+
+                    if not out_log:
+                        # If we have never saved anything open a new file
+                        out_log = io.open(path, "w", encoding='utf-8', errors="ignore")
+                        # Adding the path to the log so we can move it to the archive folder when we finish
+                    else:
+                        # Closing the last file that was written into
+                        out_log.close()
+
+                        # Opening an new file with a new path
+                        out_log = open(path, "w")
+                        # Adding the path to the log so we can move it to the archive folder when we finish
+
+                if out_log:
+                    # Write the data into the logs
+                    try:
+                        out_log.write(line + "")
+                    except UnicodeEncodeError:
+                        L.warning("Unable to process line" + str(i))
+
+        if out_log:
+            out_log.close()
+
+    def get_out_log_path(self, asset_name):
+        """
+        Constructs the name of the output log file
+        :return:
+        """
+
+        asset_file_name = asset_name + "_" + self.asset_type + ".log"
+        path = pathlib.Path(self.temp_extract_path).joinpath(asset_file_name)
+
+        return path
+
+    @staticmethod
+    def is_start_of_package_summary(line):
+
+        if "Package '" and "' Summary" in line:
+            return True
+        else:
+            return False
+
+    @staticmethod
+    def get_asset_name_from_summary_line(line):
+
+        """
+        :return: name of the asset being worked on
+        """
+
+        split = line.split(" ")
+        split.pop()
+        asset_path = split[len(split)-1]
+
+        asset_path_split = asset_path.split("/")
+
+        asset_name = asset_path_split[len(asset_path_split)-1]
+        asset_name = asset_name.replace("'", "")
+
+        return asset_name

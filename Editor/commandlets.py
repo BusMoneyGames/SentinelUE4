@@ -1,10 +1,8 @@
 # coding=utf-8
 import subprocess
-import shutil
 import os
 import logging
 import pathlib
-import io
 
 import ue4_constants
 
@@ -112,7 +110,6 @@ class BaseUE4Commandlet:
 
         """
         Search for the the flags in the for the package extract and returns the default one if we find one
-        :param commandlet_settings:
         :return:
         """
 
@@ -153,16 +150,6 @@ class BaseUE4Commandlet:
             L.warning("Process exit with exit code: %s", popen.returncode)
             sys.exit(popen.returncode)
 
-    def get_source_log_file(self):
-        """
-        Get the path to the log file that is saved by the engine
-        :return: source log file path
-        """
-
-        path = self.saved_logs_folder_path.joinpath(self.log_file_name)
-
-        return path
-
     def get_target_log_file(self):
         """
         Get the path to the log file where it is stored for processing
@@ -170,162 +157,6 @@ class BaseUE4Commandlet:
         """
 
         return os.path.join(self.raw_log_path, self.log_file_name)
-
-    def move_log_to_report_folder(self):
-
-        """
-        Move the log file from the source location to the target location
-        :return: None
-        """
-
-        shutil.copy(self.get_source_log_file(), self.get_target_log_file())
-
-        return self.get_target_log_file()
-
-
-class PackageInfoCommandlet(BaseUE4Commandlet):
-    """ Runs the package info commandlet """
-    def __init__(self, run_config, unreal_asset_file_paths, asset_type="Default"):
-        """
-        :param unreal_project_info:
-        :param unreal_asset_file_path:  Absolute path to the unreal engine asset file
-        :param each_chunk_hash:  list of package file hashes for archiving
-        """
-
-        # Initializes the object
-        super().__init__(run_config, "_PkgInfoCommandlet", files=unreal_asset_file_paths)
-
-        self.temp_extract_path = pathlib.Path(self.environment_config["version_control_root"]).joinpath( "temp")
-
-        self.unreal_asset_file_paths = unreal_asset_file_paths
-        self.asset_type = asset_type
-        self.generated_logs = []
-
-    def has_custom_type_config(self):
-
-        # The default asset type is always valid
-        if self.asset_type == "Default":
-            return True
-
-        return self.asset_type in self.commandlet_settings["detail_extract_types"]
-
-    def get_commandlet_flags(self):
-
-        # The Default asset type just used the default flags
-        if self.asset_type == "Default":
-            return super(PackageInfoCommandlet, self).get_commandlet_flags()
-
-        commandlet_flags = self.commandlet_settings["detailed_extract"]
-
-        return commandlet_flags
-
-    def run(self):
-        """
-        Prepares and runs the Package info commandlet
-        :return: path to the log file
-        """
-
-        commandlet_command = self.get_command()
-
-        L.debug(commandlet_command)
-
-        temp_dump_file = os.path.join(self.temp_extract_path, "_tempDump.log")
-        L.debug(temp_dump_file)
-
-        if not os.path.exists(os.path.dirname(temp_dump_file)):
-            os.makedirs(os.path.dirname(temp_dump_file))
-
-        with open(temp_dump_file, "w", encoding='utf-8', errors="ignore") as temp_out:
-            subprocess.run(commandlet_command, stdout=temp_out, stderr=subprocess.STDOUT)
-
-        self.split_temp_log_into_raw_files(temp_dump_file)
-
-        # Deleting the temp file and folder
-        # shutil.rmtree(os.path.dirname(temp_dump_file))
-
-    def _register_log_path(self, path):
-        self.generated_logs.append(path)
-
-    def get_generated_logs(self):
-        return self.generated_logs
-
-    def split_temp_log_into_raw_files(self, temp_log_path):
-
-        """
-        Split the temp file into smaller pieces in the raw folder
-        :param temp_log_path:
-        :return:
-        """
-
-        out_log = None
-
-        with io.open(temp_log_path, encoding='utf-8', errors="ignore") as infile:
-            for i, line in enumerate(infile):
-                if self.is_start_of_package_summary(line):
-
-                    asset_name = self.get_asset_name_from_summary_line(line)
-                    path = self.get_out_log_path(asset_name)
-                    print(path)
-                    self._register_log_path(path)
-
-                    if not out_log:
-                        # If we have never saved anything open a new file
-                        out_log = io.open(path, "w", encoding='utf-8', errors="ignore")
-                        # Adding the path to the log so we can move it to the archive folder when we finish
-                    else:
-                        # Closing the last file that was written into
-                        out_log.close()
-
-                        # Opening an new file with a new path
-                        out_log = open(path, "w")
-                        # Adding the path to the log so we can move it to the archive folder when we finish
-
-                if out_log:
-                    # Write the data into the logs
-                    try:
-                        out_log.write(line + "")
-                    except UnicodeEncodeError:
-                        L.warning("Unable to process line" + str(i))
-
-        if out_log:
-            out_log.close()
-
-    def get_out_log_path(self, asset_name):
-        """
-        Constructs the name of the output log file
-        :return:
-        """
-
-        asset_file_name = asset_name + "_" + self.asset_type + ".log"
-        path = pathlib.Path(self.temp_extract_path).joinpath(asset_file_name)
-
-        return path
-
-    @staticmethod
-    def is_start_of_package_summary(line):
-
-        if "Package '" and "' Summary" in line:
-            return True
-        else:
-            return False
-
-    @staticmethod
-    def get_asset_name_from_summary_line(line):
-
-        """
-        :return: name of the asset being worked on
-        """
-
-        split = line.split(" ")
-        split.pop()
-        asset_path = split[len(split)-1]
-
-        asset_path_split = asset_path.split("/")
-
-        asset_name = asset_path_split[len(asset_path_split)-1]
-        asset_name = asset_name.replace("'", "")
-
-        return asset_name
 
 
 def get_commandlet_class(run_config, commandlet_name):
