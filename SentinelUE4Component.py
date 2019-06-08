@@ -51,7 +51,7 @@ def cli(ctx, project_root, debug, output):
         message_format = '%(levelname)s - %(message)s '
     else:
         message_format = '%(levelname)s %(message)s '
-        L.setLevel(logging.ERROR)
+        L.setLevel(logging.INFO)
 
     logging.basicConfig(format=message_format)
 

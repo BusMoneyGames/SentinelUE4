@@ -15,25 +15,24 @@ from Editor import commandlets, editorutilities
 L = logging.getLogger(__name__)
 
 
-class PackageHashInfo:
+class ProjectHashMap:
     """
     Takes in a list of files and generates a unique has value from them
     """
 
-    def __init__(self, list_of_files, archive_folder_path):
+    def __init__(self, list_of_files):
 
-        self.archive_folder_root = archive_folder_path
         self.list_of_files = list_of_files
 
         self.hash_value_mapping = {}
         self.hash_values_in_project = []
+
         self._generate_hash_for_files()
 
     @staticmethod
     def _get_file_hash(file_path):
         """
         Reads a file and generates a hash value for it
-        :param file_path:
         :return:
         """
 
@@ -60,8 +59,7 @@ class PackageHashInfo:
             self.hash_value_mapping[file_hash_value] = each_file
 
             if i % 500 == 0:
-                L.info("Searching %s out of %s", str(
-                    i), str(len(self.list_of_files)))
+                L.info("Generating Hash for %s out of %s", str(i), str(len(self.list_of_files)))
 
     def get_hash_from_filename(self, filename):
 
@@ -71,6 +69,7 @@ class PackageHashInfo:
                 return each_hash
 
         L.warning("Unable to find hash from filename!")
+
         return ""
 
 
@@ -88,18 +87,17 @@ class ExtractedDataArchive:
 
     def get_missing_files(self):
         """
-        Returns a file list from the list a list of hashes
-        :param list_of_hashes:
-        :return:
         """
 
         missing_files = []
         # Go through each file and checks if its missing from the archive
         # Add to list if its missing
+
         for each_hash in self.project_hash_file_mappings:
             if not self.is_hash_value_in_archive(each_hash):
                 missing_file = self.project_hash_file_mappings[each_hash]
-                L.debug("Missing from archive %s", missing_file )
+
+                L.debug("Missing from archive %s", missing_file)
                 missing_files.append(str(missing_file))
 
         return missing_files
@@ -138,41 +136,12 @@ class ExtractedDataArchive:
         return self.hash_values_in_archive
 
 
-class RawAssetUtilities:
-    """
-    Acts on a folder containing text files extracted from unreal engine and returns
-    """
-
-    def __init__(self, raw_folder_path):
-
-        self.raw_folder_path: pathlib.Path = raw_folder_path
-
-    def get_asset_names_by_type(self):
-        """
-        iterates through the raw folder folders,  finds the default data end figures out the types of the files
-        :return:
-        """
-
-        asset_dict = {}
-        for each_file in self.raw_folder_path.glob('**/*Default.log'):
-            each_file = pathlib.Path(each_file)
-
-            asset_type = get_asset_type_from_log_file(each_file)
-            asset_path = get_asset_path_from_log_file(each_file)
-
-            if asset_type in asset_dict:
-
-                asset_dict[asset_type].append(asset_path)
-            else:
-                asset_dict[asset_type] = [asset_path]
-
-        return asset_dict
-
 
 class BasePackageInspection:
 
     def __init__(self, run_config):
         L.info("Starting Package Inspection")
+
         self.run_config = run_config
         self.environment_config = run_config[ue4_constants.ENVIRONMENT_CATEGORY]
         self.sentinel_structure = run_config[ue4_constants.SENTINEL_PROJECT_STRUCTURE]
@@ -181,10 +150,6 @@ class BasePackageInspection:
         self.editor_util = editorutilities.UE4EditorUtilities(run_config)
 
         self._clear_old_data_from_raw()
-
-        self.files_in_project = []
-        self.pkg_hash_obj = None
-        self.archive_obj = None
 
     def _construct_paths(self):
         """Makes the paths for outputs inside of the root artifact folder"""
@@ -207,61 +172,33 @@ class BasePackageInspection:
         if not self.processed_path.exists():
             os.makedirs(self.processed_path)
 
-    def get_files_in_project(self):
-        """
-        :return: all files in the project
-        """
-        if self.files_in_project:
-            return self.files_in_project
-
-        self.files_in_project = self.editor_util.get_all_content_files()
-
-        return self.files_in_project
-
-    def get_file_hash_info(self):
-        if self.pkg_hash_obj:
-            return self.pkg_hash_obj
-
-        files = self.get_files_in_project()
-        self.pkg_hash_obj = PackageHashInfo(files, self.raw_data_dir)
-
-        return self.pkg_hash_obj
-
-    def get_archive_info(self):
-        # Check if we have an archive object cached
-        if self.archive_obj:
-            return self.archive_obj
-
-        hash_obj = self.get_file_hash_info()
-        self.archive_obj = ExtractedDataArchive(self.archive_folder_path, hash_obj.hash_value_mapping)
-
-        return self.archive_obj
-
-    def run(self, clean=False):
+    def run(self):
         """
         Does a simple engine extract for asset to be able to determine asset type and other basic info
         """
-        # Delete any existing data
-        if clean:
-            self._clear_data_from_archive()
-            self._clear_old_data_from_raw()
 
-        # Object that gives information about the archive
-        archive_object = self.get_archive_info()
+        project_files = self.editor_util.get_all_content_files()
+        L.info("UE project has: %s files total", len(project_files))
 
-        # Convert the missing hash values to file paths
+        # hash mapping for the files in the project
+        hash_mapping = ProjectHashMap(project_files)
+        L.info("Hash Mapping completed")
+
+        # Compares the hash values with what has already been archived
+        archive_object = ExtractedDataArchive(self.archive_folder_path, hash_mapping.hash_value_mapping)
+
+        # Return a list of the missing files
         missing_file_list = archive_object.get_missing_files()
-        L.info("%s files missing... Starting package inspection", len(missing_file_list))
+        L.info("%s files need to be refresh", len(missing_file_list))
         L.debug("Missing files:  %s", "\n".join(missing_file_list))
 
-        # Take all the files that were added to files_to process and split them up into smaller lists
-        chunks_of_files_to_process = self.split_all_files_into_smaller_lists(missing_file_list, 100)
+        chunks_of_files_to_process = split_list_into_chunks(missing_file_list, 100)
 
         #  This is where we go through all the to be able to get information about paths and types
-        self._extract_from_files(chunks_of_files_to_process, "Default")
-        self._extract_detailed_package_info()
+        self._extract_from_files(chunks_of_files_to_process)
+        # self._extract_detailed_package_info()
 
-        self.recover_files_from_archive()
+        # self.recover_files_from_archive()
 
     def _clear_old_data_from_raw(self):
 
@@ -287,48 +224,22 @@ class BasePackageInspection:
 
         return file_list
 
-    def _extract_detailed_package_info(self):
-
-        raw_utilities = RawAssetUtilities(self.raw_data_dir)
-        type_dict = raw_utilities.get_asset_names_by_type()
-
-        for each in type_dict:
-            package_paths = type_dict[each]
-            chunks_of_files_to_process = self.split_all_files_into_smaller_lists(
-                package_paths, 50)
-
-            print("*"*50)
-            print(each)
-            print("*"*50)
-
-            self._extract_from_files(chunks_of_files_to_process, each)
-
-    def _extract_from_files(self, chunks_of_files_to_process, asset_types="Default"):
+    def _extract_from_files(self, chunks_of_files_to_process):
 
         # TODO deals the case where the user deletes files
         for i, each_chunk in enumerate(chunks_of_files_to_process):
 
-            package_info_run_object = PackageInfoCommandlet(
-                self.run_config,
-                each_chunk,
-                asset_types
-            )
+            package_info_run_object = PackageInfoCommandlet(self.run_config, each_chunk)
 
-            if not package_info_run_object.has_custom_type_config():
-                print("Skipping detailed extract of type: ", asset_types)
-                break
-
-            L.info("Starting chunk %s out of %s ", i + 1,
-                   str(len(chunks_of_files_to_process)))
-            L.info("Files in chunk:\n %s \n", "\n".join(each_chunk))
+            L.info("Starting chunk %s out of %s ", i + 1, str(len(chunks_of_files_to_process)))
 
             # Runs the extract
             package_info_run_object.run()
 
-            generated_logs = package_info_run_object.get_generated_logs()
-            self.convert_to_json(generated_logs)
+            # generated_logs = package_info_run_object.get_generated_logs()
+            # self.convert_to_json(generated_logs)
 
-            self._process_generated_logs(generated_logs)
+            # self._process_generated_logs(generated_logs)
 
     def convert_to_json(self, generated_logs):
 
@@ -420,21 +331,18 @@ class BasePackageInspection:
             else:
                 L.error("Attempting to copy a folder that has not been cached yet")
 
-    @staticmethod
-    def split_all_files_into_smaller_lists(all_files, count_per_list):
-        """
-        Takes a list and splits it up into smaller lists
-        :param all_files:
-        :param count_per_list:
-        :return:
-        """
 
-        chunks = []
-        for i in range(0, len(all_files), count_per_list):
-            chunk = all_files[i:i + count_per_list]
-            chunks.append(chunk)
+def split_list_into_chunks(list_to_split, max_entries_per_list):
+    """
+    Takes a list and splits it up into smaller lists
+    """
 
-        return chunks
+    chunks = []
+    for i in range(0, len(list_to_split), max_entries_per_list):
+        chunk = list_to_split[i:i + max_entries_per_list]
+        chunks.append(chunk)
+
+    return chunks
 
 
 # TODO move this function to the LogParser package
@@ -492,34 +400,11 @@ def get_asset_type_from_log_file(log_file_path):
 
 class PackageInfoCommandlet(commandlets.BaseUE4Commandlet):
     """ Runs the package info commandlet """
-    def __init__(self, run_config, unreal_asset_file_paths, asset_type="Default"):
-
+    def __init__(self, run_config, unreal_asset_file_paths):
         # Initializes the object
         super().__init__(run_config, "_PkgInfoCommandlet", files=unreal_asset_file_paths)
 
-        self.temp_extract_path = pathlib.Path(self.environment_config["version_control_root"]).joinpath( "temp")
-
-        self.unreal_asset_file_paths = unreal_asset_file_paths
-        self.asset_type = asset_type
-        self.generated_logs = []
-
-    def has_custom_type_config(self):
-
-        # The default asset type is always valid
-        if self.asset_type == "Default":
-            return True
-
-        return self.asset_type in self.commandlet_settings["detail_extract_types"]
-
-    def get_commandlet_flags(self):
-
-        # The Default asset type just used the default flags
-        if self.asset_type == "Default":
-            return super(PackageInfoCommandlet, self).get_commandlet_flags()
-
-        commandlet_flags = self.commandlet_settings["detailed_extract"]
-
-        return commandlet_flags
+        self.temp_extract_dir = pathlib.Path(self.environment_config["sentinel_artifacts_path"]).joinpath("temp")
 
     def run(self):
         """
@@ -529,27 +414,25 @@ class PackageInfoCommandlet(commandlets.BaseUE4Commandlet):
 
         commandlet_command = self.get_command()
 
-        L.debug(commandlet_command)
+        name = "_raw_package_info.log"
+        path = pathlib.Path(self.temp_extract_dir, "0" + name)
 
-        temp_dump_file = os.path.join(self.temp_extract_path, "_tempDump.log")
-        L.debug(temp_dump_file)
+        if not os.path.exists(self.temp_extract_dir):
+            os.makedirs(self.temp_extract_dir)
 
-        if not os.path.exists(os.path.dirname(temp_dump_file)):
-            os.makedirs(os.path.dirname(temp_dump_file))
+        if path.exists():
+            number_of_files = len(os.listdir(self.temp_extract_dir))
+            path = pathlib.Path(self.temp_extract_dir, str(number_of_files) + name)
 
-        with open(temp_dump_file, "w", encoding='utf-8', errors="ignore") as temp_out:
+        L.info("Writing to: %s", path)
+
+        with open(path, "w", encoding='utf-8', errors="ignore") as temp_out:
             subprocess.run(commandlet_command, stdout=temp_out, stderr=subprocess.STDOUT)
 
-        self.split_temp_log_into_raw_files(temp_dump_file)
+        # RawLogSplitter().split_temp_log_into_raw_files(temp_dump_file)
 
-        # Deleting the temp file and folder
-        # shutil.rmtree(os.path.dirname(temp_dump_file))
 
-    def _register_log_path(self, path):
-        self.generated_logs.append(path)
-
-    def get_generated_logs(self):
-        return self.generated_logs
+class RawLogSplitter:
 
     def split_temp_log_into_raw_files(self, temp_log_path):
 
@@ -566,9 +449,8 @@ class PackageInfoCommandlet(commandlets.BaseUE4Commandlet):
                 if self.is_start_of_package_summary(line):
 
                     asset_name = self.get_asset_name_from_summary_line(line)
+
                     path = self.get_out_log_path(asset_name)
-                    print(path)
-                    self._register_log_path(path)
 
                     if not out_log:
                         # If we have never saved anything open a new file
