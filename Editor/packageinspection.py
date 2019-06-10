@@ -258,7 +258,7 @@ class RawLogSplitter:
 
         self.output_files = []
 
-    def split_temp_log_into_raw_files(self, temp_log_path):
+    def _split_temp_log_into_raw_files(self, temp_log_path):
 
         """
         Split the temp file into smaller pieces in the raw folder
@@ -273,7 +273,7 @@ class RawLogSplitter:
         with io.open(temp_log_path, encoding='utf-8', errors="ignore") as infile:
 
             for i, line in enumerate(infile):
-                if self.is_start_of_package_summary(line):
+                if self._is_start_of_package_summary(line):
 
                     if not out_log:
 
@@ -285,7 +285,7 @@ class RawLogSplitter:
                         # Closing the last file that was written into
                         out_log.close()
                         # Rename the file to the guid name
-                        self.move_temp_file(temp_file_path)
+                        self._move_temp_file(temp_file_path)
 
                         # Opening an new file with a new path
                         out_log = open(temp_file_path, "w")
@@ -300,9 +300,9 @@ class RawLogSplitter:
         # Handles the last file
         if out_log:
             out_log.close()
-            self.move_temp_file(temp_file_path)
+            self._move_temp_file(temp_file_path)
 
-    def move_temp_file(self, temp_file):
+    def _move_temp_file(self, temp_file):
 
         # absolute path to the file
         asset_path = get_asset_path_from_log_file(temp_file)
@@ -315,13 +315,14 @@ class RawLogSplitter:
             os.makedirs(out_path.parent)
 
         shutil.move(temp_file, out_path)
+        self.output_files.append(out_path)
 
     def run(self):
         for each_log_file in self._log_files_list:
-            self.split_temp_log_into_raw_files(each_log_file)
+            self._split_temp_log_into_raw_files(each_log_file)
 
     @staticmethod
-    def is_start_of_package_summary(line):
+    def _is_start_of_package_summary(line):
 
         if "Package '" and "' Summary" in line:
             return True
@@ -329,7 +330,7 @@ class RawLogSplitter:
             return False
 
     @staticmethod
-    def get_asset_name_from_summary_line(line):
+    def _get_asset_name_from_summary_line(line):
 
         """
         :return: name of the asset being worked on
@@ -347,16 +348,20 @@ class RawLogSplitter:
         return asset_name
 
 
-def convert_file_list_to_json(list_of_log_files, out_root):
+def convert_file_list_to_json(run_config, list_of_log_files):
     """ Goes through a list of log files and converts them to json"""
+
+    path_root = pathlib.Path(run_config["environment"]["sentinel_artifacts_path"]).joinpath("Data", "Packages")
+
+    if not path_root.exists():
+        os.makedirs(path_root)
 
     for each_generated_log in list_of_log_files:
         log = PackageInfoLog.PkgLogObject(each_generated_log)
         data = log.get_data()
         name = pathlib.Path(each_generated_log).name
 
-        out_path = pathlib.Path(out_root)
-        path = out_path.joinpath(name + ".json")
+        path = path_root.joinpath(name + ".json")
 
         with open(path, 'w') as outfile:
             json.dump(data, outfile, indent=4)
