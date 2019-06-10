@@ -165,9 +165,16 @@ def run_project_task(ctx, task):
 @click.pass_context
 def refresh_asset_info(ctx):
     """ extracts raw information about assets"""
-    # TODO Handle the config overwrite
     run_config = ctx.obj['RUN_CONFIG']
-    packageinspection.BasePackageInspection(run_config).run()
+
+    # Runs package inspection on all the files
+    inspector = packageinspection.BasePackageInspection(run_config)
+    inspector.run()
+
+    # Splits the raw inspected files into individual files
+    splitter = packageinspection.RawLogSplitter(run_config, inspector.extracted_files)
+    splitter.run()
+
 
 
 @cli.group()

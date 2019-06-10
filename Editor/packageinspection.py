@@ -136,48 +136,48 @@ class ExtractedDataArchive:
         return self.hash_values_in_archive
 
 
-
 class BasePackageInspection:
 
     def __init__(self, run_config):
         L.info("Starting Package Inspection")
 
-        self.run_config = run_config
-        self.environment_config = run_config[ue4_constants.ENVIRONMENT_CATEGORY]
-        self.sentinel_structure = run_config[ue4_constants.SENTINEL_PROJECT_STRUCTURE]
+        self._run_config = run_config
+        self._environment_config = run_config[ue4_constants.ENVIRONMENT_CATEGORY]
+        self._sentinel_structure = run_config[ue4_constants.SENTINEL_PROJECT_STRUCTURE]
+
         self._construct_paths()
+        self._editor_util = editorutilities.UE4EditorUtilities(run_config)
 
-        self.editor_util = editorutilities.UE4EditorUtilities(run_config)
-
-        self._clear_old_data_from_raw()
+        # Files that have been extracted
+        self.extracted_files = []
 
     def _construct_paths(self):
         """Makes the paths for outputs inside of the root artifact folder"""
 
-        self.sentinel_root = pathlib.Path(self.environment_config[ue4_constants.SENTINEL_ARTIFACTS_ROOT_PATH])
-        L.debug("Sentinel Root: %s ", self.sentinel_root)
+        self._sentinel_root = pathlib.Path(self._environment_config[ue4_constants.SENTINEL_ARTIFACTS_ROOT_PATH])
+        L.debug("Sentinel Root: %s ", self._sentinel_root)
 
-        self.archive_folder_path = pathlib.Path(self.environment_config[ue4_constants.SENTINEL_CACHE_ROOT])
+        self._archive_folder_path = pathlib.Path(self._environment_config[ue4_constants.SENTINEL_CACHE_ROOT])
 
-        self.raw_data_dir = self.sentinel_root.joinpath(self.sentinel_structure[
+        self._raw_data_dir = self._sentinel_root.joinpath(self._sentinel_structure[
                                                             ue4_constants.SENTINEL_RAW_LOGS_PATH]).resolve()
 
-        self.processed_path = self.sentinel_root.joinpath(self.sentinel_structure[
+        self._processed_path = self._sentinel_root.joinpath(self._sentinel_structure[
                                                               ue4_constants.SENTINEL_PROCESSED_PATH]).resolve()
 
-        if not self.archive_folder_path.exists():
-            os.makedirs(self.archive_folder_path)
-        if not self.raw_data_dir.exists():
-            os.makedirs(self.raw_data_dir)
-        if not self.processed_path.exists():
-            os.makedirs(self.processed_path)
+        if not self._archive_folder_path.exists():
+            os.makedirs(self._archive_folder_path)
+        if not self._raw_data_dir.exists():
+            os.makedirs(self._raw_data_dir)
+        if not self._processed_path.exists():
+            os.makedirs(self._processed_path)
 
     def run(self):
         """
         Does a simple engine extract for asset to be able to determine asset type and other basic info
         """
 
-        project_files = self.editor_util.get_all_content_files()
+        project_files = self._editor_util.get_all_content_files()
         L.info("UE project has: %s files total", len(project_files))
 
         # hash mapping for the files in the project
@@ -185,7 +185,7 @@ class BasePackageInspection:
         L.info("Hash Mapping completed")
 
         # Compares the hash values with what has already been archived
-        archive_object = ExtractedDataArchive(self.archive_folder_path, hash_mapping.hash_value_mapping)
+        archive_object = ExtractedDataArchive(self._archive_folder_path, hash_mapping.hash_value_mapping)
 
         # Return a list of the missing files
         missing_file_list = archive_object.get_missing_files()
@@ -196,140 +196,170 @@ class BasePackageInspection:
 
         #  This is where we go through all the to be able to get information about paths and types
         self._extract_from_files(chunks_of_files_to_process)
-        # self._extract_detailed_package_info()
-
-        # self.recover_files_from_archive()
-
-    def _clear_old_data_from_raw(self):
-
-        if self.raw_data_dir.exists():
-            shutil.rmtree(self.raw_data_dir)
-
-    def _clear_data_from_archive(self):
-        if self.raw_data_dir.exists():
-            shutil.rmtree(self.raw_data_dir)
-
-    def _get_list_of_files_from_hash(self, list_of_hashes):
-        """
-        Returns a file list from the list a list of hashes
-        :param list_of_hashes:
-        :return:
-        """
-
-        file_list = []
-        for each_hash in self.pkg_hash_obj.hash_value_mapping:
-            if each_hash in list_of_hashes:
-                file_list.append(
-                    self.pkg_hash_obj.hash_value_mapping[each_hash])
-
-        return file_list
 
     def _extract_from_files(self, chunks_of_files_to_process):
 
         # TODO deals the case where the user deletes files
         for i, each_chunk in enumerate(chunks_of_files_to_process):
 
-            package_info_run_object = PackageInfoCommandlet(self.run_config, each_chunk)
+            package_info_run_object = PackageInfoCommandlet(self._run_config, each_chunk)
 
             L.info("Starting chunk %s out of %s ", i + 1, str(len(chunks_of_files_to_process)))
 
             # Runs the extract
             package_info_run_object.run()
 
-            # generated_logs = package_info_run_object.get_generated_logs()
-            # self.convert_to_json(generated_logs)
+            # Save the file path
+            self.extracted_files.append(package_info_run_object.output_file)
 
-            # self._process_generated_logs(generated_logs)
 
-    def convert_to_json(self, generated_logs):
+class PackageInfoCommandlet(commandlets.BaseUE4Commandlet):
+    """ Runs the package info commandlet """
+    def __init__(self, run_config, unreal_asset_file_paths):
+        # Initializes the object
+        super().__init__(run_config, "_PkgInfoCommandlet", files=unreal_asset_file_paths)
 
-        for each_generated_log in generated_logs:
-            log = PackageInfoLog.PkgLogObject(each_generated_log)
-            data = log.get_data()
-            name = pathlib.Path(each_generated_log).name
+        self.temp_extract_dir = pathlib.Path(self.environment_config["sentinel_artifacts_path"]).joinpath("temp")
+        self.output_file = ""
 
-            path = self.processed_path.joinpath(name + ".json")
-
-            with open(path, 'w') as outfile:
-                json.dump(data, outfile,indent=4)
-
-    def _process_generated_logs(self, generated_logs):
-
-        for each_log in generated_logs:
-            log_file = pathlib.Path(each_log)
-
-            if not log_file.exists():
-                L.error("No File Found at: %s", log_file)
-                continue
-
-            asset_path = get_asset_path_from_log_file(log_file)
-            asset_type = get_asset_type_from_log_file(log_file)
-            hash_value = self.pkg_hash_obj.get_hash_from_filename(asset_path)
-
-            if log_file.name.endswith("Default.log"):
-                name_with_type = log_file.name.replace("Default.log", asset_type + ".log")
-            else:
-                name_with_type = log_file.name
-
-            target_file = pathlib.Path(self.raw_data_dir).joinpath(
-                hash_value, name_with_type)
-
-            if not target_file.parent.exists():
-                os.makedirs(target_file.parent)
-
-            # Moving the file to the archive folder:
-            archive_file_path = self.archive_folder_path.joinpath(
-                hash_value, name_with_type)
-
-            # Moving the file to a folder with the hash value
-            if not target_file.exists():
-                shutil.move(each_log, target_file)
-            else:
-                L.error("Unable to move %s to the target location: %s", each_log, target_file)
-
-            # Copy the file to the archive folder
-            if not archive_file_path.parent.exists():
-                os.mkdir(archive_file_path.parent)
-
-            if not archive_file_path.exists():
-                shutil.copy(target_file, archive_file_path)
-            else:
-                L.error("Unable to copy %s to archive folder, path already exists", target_file)
-
-    def recover_files_from_archive(self):
+    def run(self):
         """
-        Moves each file from the archive to the raw folder so that it can be processed
+        Prepares and runs the Package info commandlet
+        :return: path to the log file
+        """
+
+        commandlet_command = self.get_command()
+
+        name = "_raw_package_info.log"
+        path = pathlib.Path(self.temp_extract_dir, "0" + name)
+
+        if not os.path.exists(self.temp_extract_dir):
+            os.makedirs(self.temp_extract_dir)
+
+        if path.exists():
+            number_of_files = len(os.listdir(self.temp_extract_dir))
+            path = pathlib.Path(self.temp_extract_dir, str(number_of_files) + name)
+
+        L.info("Writing to: %s", path)
+
+        with open(path, "w", encoding='utf-8', errors="ignore") as temp_out:
+            subprocess.run(commandlet_command, stdout=temp_out, stderr=subprocess.STDOUT)
+
+        self.output_file = path
+
+
+class RawLogSplitter:
+    def __init__(self, run_config, log_files):
+        self._run_config = run_config
+        self._log_files_list = log_files
+
+        self._editor_util = editorutilities.UE4EditorUtilities(run_config)
+        self.hash_mapping = ProjectHashMap(self._editor_util.get_all_content_files())
+
+        self.output_files = []
+
+    def split_temp_log_into_raw_files(self, temp_log_path):
+
+        """
+        Split the temp file into smaller pieces in the raw folder
+        :param temp_log_path:
         :return:
         """
 
-        # Clear the file in the archive to make sure that we have a folder to move the files to
-        self._clear_old_data_from_raw()
+        out_log = None
 
-        project_hash_object = self.get_file_hash_info()
-        archive_obj = self.get_archive_info()
+        temp_file_path = pathlib.Path(self._run_config["environment"]["sentinel_artifacts_path"]).joinpath("_temp.log")
 
-        # Clear the raw folder and copy the files from there to have a clean environment
-        self._clear_old_data_from_raw()
+        with io.open(temp_log_path, encoding='utf-8', errors="ignore") as infile:
 
-        for each_hash_value in project_hash_object.hash_value_mapping:
+            for i, line in enumerate(infile):
+                if self.is_start_of_package_summary(line):
 
-            # Matching the paths in the archive folder with the hash for the project files
-            if archive_obj.is_hash_value_in_archive(each_hash_value):
+                    if not out_log:
 
-                # Construct the source path and the target path
+                        # If we have never saved anything open a new file
+                        out_log = io.open(temp_file_path, "w", encoding='utf-8', errors="ignore")
+                        # Adding the path to the log so we can move it to the archive folder when we finish
 
-                source_path = self.archive_folder_path.joinpath(each_hash_value)
-                target_path = pathlib.Path(self.raw_data_dir).joinpath(each_hash_value)
+                    else:
+                        # Closing the last file that was written into
+                        out_log.close()
+                        # Rename the file to the guid name
+                        self.move_temp_file(temp_file_path)
 
-                # Copy the folders to the target path
-                if target_path.exists():
-                    # TODO somehow figure out a way to handle if two files have the exact same hash value
-                    L.error("Unable to recover file: %s from archive", target_path)
-                else:
-                    shutil.copytree(source_path, target_path)
+                        # Opening an new file with a new path
+                        out_log = open(temp_file_path, "w")
+                        # Adding the path to the log so we can move it to the archive folder when we finish
+                if out_log:
+                    # Write the data into the logs
+                    try:
+                        out_log.write(line + "")
+                    except UnicodeEncodeError:
+                        L.warning("Unable to process line" + str(i))
 
-            else:
-                L.error("Attempting to copy a folder that has not been cached yet")
+        # Handles the last file
+        if out_log:
+            out_log.close()
+            self.move_temp_file(temp_file_path)
+
+    def move_temp_file(self, temp_file):
+
+        # absolute path to the file
+        asset_path = get_asset_path_from_log_file(temp_file)
+        hash = self.hash_mapping.get_hash_from_filename(asset_path)
+
+        artifacts_path = pathlib.Path(self._run_config["environment"]["sentinel_artifacts_path"])
+        out_path = artifacts_path.joinpath("Raw", "Packages", hash + ".log")
+
+        if not pathlib.Path(out_path.parent).exists():
+            os.makedirs(out_path.parent)
+
+        shutil.move(temp_file, out_path)
+
+    def run(self):
+        for each_log_file in self._log_files_list:
+            self.split_temp_log_into_raw_files(each_log_file)
+
+    @staticmethod
+    def is_start_of_package_summary(line):
+
+        if "Package '" and "' Summary" in line:
+            return True
+        else:
+            return False
+
+    @staticmethod
+    def get_asset_name_from_summary_line(line):
+
+        """
+        :return: name of the asset being worked on
+        """
+
+        split = line.split(" ")
+        split.pop()
+        asset_path = split[len(split)-1]
+
+        asset_path_split = asset_path.split("/")
+
+        asset_name = asset_path_split[len(asset_path_split)-1]
+        asset_name = asset_name.replace("'", "")
+
+        return asset_name
+
+
+def convert_file_list_to_json(list_of_log_files, out_root):
+    """ Goes through a list of log files and converts them to json"""
+
+    for each_generated_log in list_of_log_files:
+        log = PackageInfoLog.PkgLogObject(each_generated_log)
+        data = log.get_data()
+        name = pathlib.Path(each_generated_log).name
+
+        out_path = pathlib.Path(out_root)
+        path = out_path.joinpath(name + ".json")
+
+        with open(path, 'w') as outfile:
+            json.dump(data, outfile, indent=4)
 
 
 def split_list_into_chunks(list_to_split, max_entries_per_list):
@@ -397,116 +427,3 @@ def get_asset_type_from_log_file(log_file_path):
 
     return asset_type
 
-
-class PackageInfoCommandlet(commandlets.BaseUE4Commandlet):
-    """ Runs the package info commandlet """
-    def __init__(self, run_config, unreal_asset_file_paths):
-        # Initializes the object
-        super().__init__(run_config, "_PkgInfoCommandlet", files=unreal_asset_file_paths)
-
-        self.temp_extract_dir = pathlib.Path(self.environment_config["sentinel_artifacts_path"]).joinpath("temp")
-
-    def run(self):
-        """
-        Prepares and runs the Package info commandlet
-        :return: path to the log file
-        """
-
-        commandlet_command = self.get_command()
-
-        name = "_raw_package_info.log"
-        path = pathlib.Path(self.temp_extract_dir, "0" + name)
-
-        if not os.path.exists(self.temp_extract_dir):
-            os.makedirs(self.temp_extract_dir)
-
-        if path.exists():
-            number_of_files = len(os.listdir(self.temp_extract_dir))
-            path = pathlib.Path(self.temp_extract_dir, str(number_of_files) + name)
-
-        L.info("Writing to: %s", path)
-
-        with open(path, "w", encoding='utf-8', errors="ignore") as temp_out:
-            subprocess.run(commandlet_command, stdout=temp_out, stderr=subprocess.STDOUT)
-
-        # RawLogSplitter().split_temp_log_into_raw_files(temp_dump_file)
-
-
-class RawLogSplitter:
-
-    def split_temp_log_into_raw_files(self, temp_log_path):
-
-        """
-        Split the temp file into smaller pieces in the raw folder
-        :param temp_log_path:
-        :return:
-        """
-
-        out_log = None
-
-        with io.open(temp_log_path, encoding='utf-8', errors="ignore") as infile:
-            for i, line in enumerate(infile):
-                if self.is_start_of_package_summary(line):
-
-                    asset_name = self.get_asset_name_from_summary_line(line)
-
-                    path = self.get_out_log_path(asset_name)
-
-                    if not out_log:
-                        # If we have never saved anything open a new file
-                        out_log = io.open(path, "w", encoding='utf-8', errors="ignore")
-                        # Adding the path to the log so we can move it to the archive folder when we finish
-                    else:
-                        # Closing the last file that was written into
-                        out_log.close()
-
-                        # Opening an new file with a new path
-                        out_log = open(path, "w")
-                        # Adding the path to the log so we can move it to the archive folder when we finish
-
-                if out_log:
-                    # Write the data into the logs
-                    try:
-                        out_log.write(line + "")
-                    except UnicodeEncodeError:
-                        L.warning("Unable to process line" + str(i))
-
-        if out_log:
-            out_log.close()
-
-    def get_out_log_path(self, asset_name):
-        """
-        Constructs the name of the output log file
-        :return:
-        """
-
-        asset_file_name = asset_name + "_" + self.asset_type + ".log"
-        path = pathlib.Path(self.temp_extract_path).joinpath(asset_file_name)
-
-        return path
-
-    @staticmethod
-    def is_start_of_package_summary(line):
-
-        if "Package '" and "' Summary" in line:
-            return True
-        else:
-            return False
-
-    @staticmethod
-    def get_asset_name_from_summary_line(line):
-
-        """
-        :return: name of the asset being worked on
-        """
-
-        split = line.split(" ")
-        split.pop()
-        asset_path = split[len(split)-1]
-
-        asset_path_split = asset_path.split("/")
-
-        asset_name = asset_path_split[len(asset_path_split)-1]
-        asset_name = asset_name.replace("'", "")
-
-        return asset_name
