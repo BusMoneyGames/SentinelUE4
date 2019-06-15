@@ -68,27 +68,6 @@ class PkgLogObject:
         # returns only the name of the asset as it would appear in the engine
         return package_path.stem
 
-    def _add_asset_package_data(self):
-
-        # TODO not sure where this is used but it needs to be
-        # Refactored
-
-        search_string = ["--------------------------------------------"]
-        warnings_string = "LogPackageUtilities: Warning: Package '"
-
-        for i, each_line in enumerate(self.filtered_lines):
-
-            if warnings_string in each_line:
-                package_data = self._extract_chunk_from_list(self.filtered_lines, i, search_string, no_lines_to_skip=2)
-
-                for each_data in package_data:
-                    if ":" in each_data:
-                        key, value = self._get_key_and_value_from_log_string("LogPackageUtilities: Warning:", each_data)
-
-                        # Only add things that have value,  this gets rid of some garbage
-                        if value:
-                            self.log_dict[key] = value
-
     def _get_log_lines(self):
         """
         Read the logs lines from disk
