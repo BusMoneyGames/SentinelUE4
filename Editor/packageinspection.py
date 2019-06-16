@@ -91,7 +91,7 @@ class ExtractedDataArchive:
         self.archive_folder_path = pathlib.Path(path_to_archive)
         self.project_hash_file_mappings = file_hash_mappings
 
-        self.hash_values_in_archive = []
+        self._hash_values_in_archive = self._get_hash_values_from_archive()
         self.missing_files = []
         self.archived_files = []
 
@@ -123,9 +123,7 @@ class ExtractedDataArchive:
         :return:
         """
 
-        hash_values_in_archive = self._get_hash_values_from_archive()
-
-        if value in hash_values_in_archive:
+        if value in self._hash_values_in_archive:
             return True
         else:
             return False
@@ -139,16 +137,13 @@ class ExtractedDataArchive:
         # TODO make it so that this can be somewhat cached but make sure that we can refresh if we know
         # That the contents of the folder has changed
 
-        self.hash_values_in_archive = []
         for each_file in self.archive_folder_path.glob("*"):
             each_file: pathlib.Path = each_file
 
             name_split = each_file.name.split(".")
             name_split.pop(-1)
             hash_value = "".join(name_split)
-            self.hash_values_in_archive.append(hash_value)
-
-        return self.hash_values_in_archive
+            self._hash_values_in_archive.append(hash_value)
 
 
 class BasePackageInspection:
@@ -200,20 +195,25 @@ class BasePackageInspection:
         L.info("Hash Mapping completed")
 
         # Compares the hash values with what has already been archived
+        L.info("Searching archive")
         archive_object = ExtractedDataArchive(self._archive_folder_path, hash_mapping.hash_value_mapping)
 
         # Return a list of the missing files
+        L.info("Generate missing files list")
         missing_file_list = archive_object.get_missing_files()
+
+        L.info("Generating list of files that already exist")
         archived_files = archive_object.get_archived_files()
 
+        L.info("Recover found files from archive")
         self._copy_archived_files_to_work_folder(archived_files)
 
         L.info("%s files need to be refresh", len(missing_file_list))
-        L.debug("Missing files:  %s", "\n".join(missing_file_list))
 
         chunks_of_files_to_process = split_list_into_chunks(missing_file_list, 100)
 
         #  This is where we go through all the to be able to get information about paths and types
+        L.info("Starting file extract")
         self._extract_from_files(chunks_of_files_to_process)
 
     def _copy_archived_files_to_work_folder(self, archived_files):
