@@ -148,6 +148,7 @@ class ExtractedDataArchive:
 
         return hash_values
 
+
 class BasePackageInspection:
 
     def __init__(self, run_config):
@@ -226,9 +227,13 @@ class BasePackageInspection:
             os.makedirs(artifacts_path.parent)
 
         for source_file in archived_files:
-
-            target = artifacts_path.joinpath("Raw", "Packages", source_file.name)
-            shutil.copy(source_file, target)
+            source_file = pathlib.Path(source_file)
+            if source_file.exists():
+                target = artifacts_path.joinpath("Raw", "Packages", source_file.name)
+                shutil.copy(source_file, target)
+            else:
+                L.error("Attempting to copy a cached file that does not exist!")
+                L.error("File name: %s", source_file)
 
     def _extract_from_files(self, chunks_of_files_to_process):
 
