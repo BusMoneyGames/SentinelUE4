@@ -137,14 +137,16 @@ class ExtractedDataArchive:
         # TODO make it so that this can be somewhat cached but make sure that we can refresh if we know
         # That the contents of the folder has changed
 
+        hash_values = []
         for each_file in self.archive_folder_path.glob("*"):
             each_file: pathlib.Path = each_file
 
             name_split = each_file.name.split(".")
             name_split.pop(-1)
             hash_value = "".join(name_split)
-            self._hash_values_in_archive.append(hash_value)
+            hash_values.append(hash_value)
 
+        return hash_values
 
 class BasePackageInspection:
 
