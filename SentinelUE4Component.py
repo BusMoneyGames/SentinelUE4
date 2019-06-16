@@ -175,8 +175,11 @@ def refresh_asset_info(ctx):
     splitter = packageinspection.RawLogSplitter(run_config, inspector.extracted_files)
     splitter.run()
 
-    # TODO move the convert file list to the same pattern as teh inspector and the splitter
-    packageinspection.convert_file_list_to_json(run_config, splitter.output_files)
+    # Archive the newly created files
+    packageinspection.archive_list_of_files(run_config, splitter.output_files)
+
+    # TODO move the convert file list to the same pattern as the inspector and the splitter
+    packageinspection.convert_file_list_to_json(run_config)
 
 
 

@@ -72,6 +72,14 @@ class ProjectHashMap:
 
         return ""
 
+    def get_filename_from_hash(self, hash_value):
+
+        if hash_value in self.hash_value_mapping.keys():
+            return self.hash_value_mapping[hash_value]
+
+        else:
+            L.error("Unable to find file for hash: %s", hash_value)
+
 
 class ExtractedDataArchive:
 
@@ -80,27 +88,33 @@ class ExtractedDataArchive:
     """
 
     def __init__(self, path_to_archive, file_hash_mappings):
-        self.archive_folder_path = path_to_archive
+        self.archive_folder_path = pathlib.Path(path_to_archive)
         self.project_hash_file_mappings = file_hash_mappings
 
         self.hash_values_in_archive = []
+        self.missing_files = []
+        self.archived_files = []
 
     def get_missing_files(self):
         """
         """
 
-        missing_files = []
-        # Go through each file and checks if its missing from the archive
-        # Add to list if its missing
-
         for each_hash in self.project_hash_file_mappings:
+
             if not self.is_hash_value_in_archive(each_hash):
                 missing_file = self.project_hash_file_mappings[each_hash]
+                self.missing_files.append(str(missing_file))
 
-                L.debug("Missing from archive %s", missing_file)
-                missing_files.append(str(missing_file))
+        return self.missing_files
 
-        return missing_files
+    def get_archived_files(self):
+
+        for each_hash in self.project_hash_file_mappings:
+            if self.is_hash_value_in_archive(each_hash):
+                hash_file_path = self.archive_folder_path.joinpath(each_hash + ".log")
+                self.archived_files.append(hash_file_path)
+
+        return self.archived_files
 
     def is_hash_value_in_archive(self, value):
         """
@@ -129,9 +143,10 @@ class ExtractedDataArchive:
         for each_file in self.archive_folder_path.glob("*"):
             each_file: pathlib.Path = each_file
 
-            if each_file.is_dir():
-                hash_value = each_file.name
-                self.hash_values_in_archive.append(hash_value)
+            name_split = each_file.name.split(".")
+            name_split.pop(-1)
+            hash_value = "".join(name_split)
+            self.hash_values_in_archive.append(hash_value)
 
         return self.hash_values_in_archive
 
@@ -189,6 +204,10 @@ class BasePackageInspection:
 
         # Return a list of the missing files
         missing_file_list = archive_object.get_missing_files()
+        archived_files = archive_object.get_archived_files()
+
+        self._copy_archived_files_to_work_folder(archived_files)
+
         L.info("%s files need to be refresh", len(missing_file_list))
         L.debug("Missing files:  %s", "\n".join(missing_file_list))
 
@@ -196,6 +215,18 @@ class BasePackageInspection:
 
         #  This is where we go through all the to be able to get information about paths and types
         self._extract_from_files(chunks_of_files_to_process)
+
+    def _copy_archived_files_to_work_folder(self, archived_files):
+
+        artifacts_path = pathlib.Path(self._run_config["environment"]["sentinel_artifacts_path"])
+
+        if not artifacts_path.exists():
+            os.makedirs(artifacts_path.parent)
+
+        for source_file in archived_files:
+
+            target = artifacts_path.joinpath("Raw", "Packages", source_file.name)
+            shutil.copy(source_file, target)
 
     def _extract_from_files(self, chunks_of_files_to_process):
 
@@ -348,15 +379,16 @@ class RawLogSplitter:
         return asset_name
 
 
-def convert_file_list_to_json(run_config, list_of_log_files):
+def convert_file_list_to_json(run_config):
     """ Goes through a list of log files and converts them to json"""
 
     path_root = pathlib.Path(run_config["environment"]["sentinel_artifacts_path"]).joinpath("Data", "Packages")
+    raw_root = pathlib.Path(run_config["environment"]["sentinel_artifacts_path"]).joinpath("Raw", "Packages")
 
     if not path_root.exists():
         os.makedirs(path_root)
 
-    for each_generated_log in list_of_log_files:
+    for each_generated_log in raw_root.glob("*/"):
         log = PackageInfoLog.PkgLogObject(each_generated_log)
         data = log.get_data()
         name = pathlib.Path(each_generated_log).name
@@ -378,6 +410,16 @@ def split_list_into_chunks(list_to_split, max_entries_per_list):
         chunks.append(chunk)
 
     return chunks
+
+
+def archive_list_of_files(run_config, list_of_files):
+
+    cache_path = pathlib.Path(run_config["environment"]["sentinel_cache_path"])
+
+    for source_file in list_of_files:
+        source_file = pathlib.Path(source_file)
+        target_file = cache_path.joinpath(source_file.name)
+        shutil.copy(source_file, target_file)
 
 
 # TODO move this function to the LogParser package
