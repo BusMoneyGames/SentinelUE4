@@ -223,13 +223,14 @@ class BasePackageInspection:
 
         artifacts_path = pathlib.Path(self._run_config["environment"]["sentinel_artifacts_path"])
 
-        if not artifacts_path.exists():
-            os.makedirs(artifacts_path.parent)
-
         for source_file in archived_files:
             source_file = pathlib.Path(source_file)
             if source_file.exists():
+
                 target = artifacts_path.joinpath("Raw", "Packages", source_file.name)
+                if not target.parent.exists():
+
+                    os.makedirs(target.parent)
                 shutil.copy(source_file, target)
             else:
                 L.error("Attempting to copy a cached file that does not exist!")
