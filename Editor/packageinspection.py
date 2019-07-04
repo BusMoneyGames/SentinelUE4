@@ -399,7 +399,7 @@ def convert_file_list_to_json(run_config):
     for each_generated_log in raw_root.glob("*/"):
         log = PackageInfoLog.PkgLogObject(each_generated_log)
         data = log.get_data()
-        name = pathlib.Path(each_generated_log).name
+        name = pathlib.Path(each_generated_log.with_suffix("")).name
 
         path = path_root.joinpath(name + ".json")
 
