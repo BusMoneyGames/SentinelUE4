@@ -49,7 +49,7 @@ class UE4EditorUtilities:
 
         if not executable.exists():
             L.error("Path not found!: %s ", executable)
-            quit(1)
+            sys.exit(1)
 
         return executable
 
