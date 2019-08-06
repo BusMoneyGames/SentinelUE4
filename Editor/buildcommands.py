@@ -160,8 +160,13 @@ class UnrealEditorBuilder(BaseUnrealBuilder):
         L.debug("Available editor compile targets: ")
         L.debug(", ".join(self.editor_compile_settings.keys()))
 
+        if run_config["unreal_engine_structure"]["is_installed"]:
+            compile_profile = "default_installed"
+        else:
+            compile_profile = "default_source"
+
         # TODO Support other platforms
-        self.platform_compile_settings = self.editor_compile_settings["default_installed"]
+        self.platform_compile_settings = self.editor_compile_settings[compile_profile]
         self.editor_components_to_build = self.platform_compile_settings["components"]
 
         self.log_output_file_name = self.sentinel_project_structure[ue4_constants.SENTINEL_DEFAULT_COMPILE_FILE_NAME]
