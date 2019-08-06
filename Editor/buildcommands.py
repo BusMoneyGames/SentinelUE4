@@ -161,7 +161,7 @@ class UnrealEditorBuilder(BaseUnrealBuilder):
         L.debug(", ".join(self.editor_compile_settings.keys()))
 
         # TODO Support other platforms
-        self.platform_compile_settings = self.editor_compile_settings["windows"]
+        self.platform_compile_settings = self.editor_compile_settings["default_installed"]
         self.editor_components_to_build = self.platform_compile_settings["components"]
 
         self.log_output_file_name = self.sentinel_project_structure[ue4_constants.SENTINEL_DEFAULT_COMPILE_FILE_NAME]
