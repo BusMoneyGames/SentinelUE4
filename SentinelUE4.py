@@ -147,8 +147,8 @@ def show_validate_profiles(ctx):
 
 @project.command()
 @click.pass_context
-@click.option('-o', '--task', help="Output type.")
-def run_project_task(ctx, task):
+@click.option('--task', help="Commandlet to run")
+def commandlet(ctx, task):
     """ Project tasks """
 
     # TODO Handle the config overwrite
