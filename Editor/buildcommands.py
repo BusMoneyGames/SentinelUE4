@@ -18,6 +18,10 @@ class BuilderFactory:
         self.run_config = run_config
 
         # TODO deal with it if there is no build config
+
+        if build_config_name == "":
+            build_config_name = "windows_default_client"
+
         self.build_config_name = build_config_name
         self.should_mock = False
 
