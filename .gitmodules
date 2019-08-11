@@ -1,0 +1,3 @@
+[submodule "SentinelInternalLogger"]
+	path = SentinelInternalLogger
+	url = git@github.com:BusMoneyGames/SentinelInternalLogger.git
