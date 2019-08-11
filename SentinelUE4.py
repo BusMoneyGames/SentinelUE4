@@ -9,7 +9,7 @@ from Editor import buildcommands, commandlets, packageinspection
 from Game import clientrunner, clientutilities
 from Game.LogProcessor import ClientRunProcessor
 
-L = logging.getLogger()
+from SentinelInternalLogger.logger import L
 
 
 def _read_config(path):
@@ -47,14 +47,9 @@ def get_validate_presets(default_run_config):
 def cli(ctx, project_root, debug, output,no_version):
     """Sentinel Unreal Component handles running commands interacting with unreal engine"""
 
-    if debug:
+    if debug == 'true':
         L.setLevel(logging.DEBUG)
-        message_format = '%(levelname)s - %(message)s '
-    else:
-        message_format = '%(levelname)s %(message)s '
-        L.setLevel(logging.INFO)
 
-    logging.basicConfig(format=message_format)
 
     config_path = pathlib.Path(project_root).joinpath("_generated_sentinel_config.json")
 
