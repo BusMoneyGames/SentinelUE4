@@ -1,9 +1,10 @@
 # coding=utf-8
 import subprocess
+import json
 import os
 import logging
 import pathlib
-
+import Editor.LogProcesser.commandletparsers as commandletparsers
 import ue4_constants
 
 if __package__ is None or __package__ == '':
@@ -13,6 +14,12 @@ else:
 
 
 L = logging.getLogger(__name__)
+
+
+def get_commandlet_log_parser(commandlet_name, file_path):
+
+    if commandlet_name.lower() == "compile-blueprints":
+        return commandletparsers.CompileBlueprintParser(file_path)
 
 
 class BaseUE4Commandlet:
@@ -142,6 +149,8 @@ class BaseUE4Commandlet:
         # Waiting for the process to close
         popen.wait()
 
+        self.parse_log(temp_dump_file)
+
         # quiting and returning with the correct return code
         if popen.returncode == 0:
             L.info("Command ran successfully")
@@ -150,13 +159,21 @@ class BaseUE4Commandlet:
             L.warning("Process exit with exit code: %s", popen.returncode)
             sys.exit(popen.returncode)
 
-    def get_target_log_file(self):
-        """
-        Get the path to the log file where it is stored for processing
-        :return:  extracted log file
-        """
 
-        return os.path.join(self.raw_log_path, self.log_file_name)
+    def parse_log(self, log_path):
+
+        parser = get_commandlet_log_parser(self.commandlet_name, log_path)
+        data = parser.get_data()
+
+        log_name = self.commandlet_name + ".json"
+        directory = self.raw_log_path.joinpath("data")
+
+        if not directory.exists():
+            os.makedirs(directory)
+
+        f = open(directory.joinpath(log_name), "w")
+        f.write(json.dumps(data, indent=4))
+        f.close()
 
 
 def get_commandlet_class(run_config, commandlet_name):

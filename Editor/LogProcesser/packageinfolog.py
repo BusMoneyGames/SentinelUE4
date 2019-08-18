@@ -584,3 +584,10 @@ class AssetRegistryParserObject(BaseDataParser):
             data_dict[each_import_data_key] = each_import_data_value
 
         return data_dict
+
+
+class CompileBlueprints(BaseDataParser):
+
+    def __init__(self, lines):
+        super().__init__(lines)
+
