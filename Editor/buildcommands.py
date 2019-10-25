@@ -1,6 +1,7 @@
 # coding=utf-8
 import sys
 import subprocess
+import shutil
 import os
 import logging
 import ue4_constants
@@ -74,7 +75,7 @@ class BaseUnrealBuilder:
 
         self.log_output_file_name = "Default_Log.log"
 
-    def prepare(self):
+    def pre_build_actions(self):
         """
         Initializes the environment before the build starts
 
@@ -90,6 +91,9 @@ class BaseUnrealBuilder:
             "Log_Location": "adfasdf",
             "Meta Data File": "123156"
         }
+
+    def post_build_actions(self):
+        pass
 
     @staticmethod
     def _prefix_config_with_dash(list_of_strings):
@@ -258,6 +262,28 @@ class UnrealClientBuilder(BaseUnrealBuilder):
             os.makedirs(out_dir)
 
         return out_dir
+
+    def post_build_actions(self):
+        super().post_build_actions()
+
+        print(self.build_settings)
+
+        # Check if key exists and if the values are true
+        if "compress" in self.build_settings and self.build_settings["compress"] is True:
+            # Creates an archive
+            L.debug("Starting to archive")
+            build_root_directory = self.get_archive_directory()
+            L.debug("Build Root: %s", build_root_directory)
+
+             # zip_file_path =
+            L.info("Starting build compression...")
+            shutil.make_archive(build_root_directory, 'zip', build_root_directory)
+            L.info("Build Compressed!")
+
+            L.debug("Removing build source since we are making an archive")
+
+            # Removing the original folder to only leave the archive
+            shutil.rmtree(build_root_directory)
 
     def get_build_command(self):
         """

@@ -93,20 +93,9 @@ def client(ctx, preset, should_archive):
     factory = buildcommands.BuilderFactory(run_config=run_config, build_config_name=preset)
     builder = factory.get_builder("Client")
 
-    builder.prepare()
-    a = builder.run()
-
-    # Creates an archive
-    if should_archive:
-        L.debug("Starting to archive")
-        build_root_directory = builder.get_archive_directory()
-        L.debug("Build Root: %s", build_root_directory)
-
-        # zip_file_path =
-        shutil.make_archive(build_root_directory, 'zip', build_root_directory)
-        L.debug("Removing build source since we are making an archive")
-        # Removing the original folder to only leave the archive
-        shutil.rmtree(build_root_directory)
+    builder.pre_build_actions()
+    builder.run()
+    builder.post_build_actions()
 
 
 @build.command()
@@ -117,7 +106,7 @@ def editor(ctx):
     factory = buildcommands.BuilderFactory(run_config=run_config)
     builder = factory.get_builder("Editor")
 
-    builder.prepare()
+    builder.pre_build_actions()
     builder.run()
 
 

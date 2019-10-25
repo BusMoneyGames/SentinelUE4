@@ -1,5 +1,4 @@
 import shutil
-
 import ue4_constants
 import sys
 import pathlib
