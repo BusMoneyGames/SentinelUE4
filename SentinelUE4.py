@@ -1,21 +1,18 @@
 import json
 import pathlib
+import sys
 import logging
-import click
-import ue4_constants
 import shutil
 
+import click
+
+import ue4_constants
 from Editor import buildcommands, commandlets, packageinspection
 from Game import clientrunner, clientutilities
 from Game.LogProcessor import ClientRunProcessor
 
-from SentinelInternalLogger.logger import L
-
-
 def _read_config(path):
     """Reads the assembled config"""
-
-    L.debug("Reading config from: %s - Exists: %s", path, path.exists())
 
     if path.exists():
         f = open(path, "r")
@@ -24,9 +21,8 @@ def _read_config(path):
 
         return config
     else:
-        L.error("Unable to find generated config at: %s ", path)
-        quit(1)
-
+        print(f"No Config file found at: {path}")
+        sys.exit(1)
 
 def get_default_build_presets(default_run_config):
     """ Read the build presets from the config """
@@ -46,10 +42,6 @@ def get_validate_presets(default_run_config):
 @click.pass_context
 def cli(ctx, project_root, debug, output,no_version):
     """Sentinel Unreal Component handles running commands interacting with unreal engine"""
-
-    if debug == 'true':
-        L.setLevel(logging.DEBUG)
-
 
     config_path = pathlib.Path(project_root).joinpath("_generated_sentinel_config.json")
 
@@ -88,7 +80,6 @@ def client(ctx, preset, should_archive):
     # to all steps
 
     run_config = ctx.obj['RUN_CONFIG']
-    L.debug("Available Builds: %s", "".join(get_default_build_presets(run_config)))
 
     factory = buildcommands.BuilderFactory(run_config=run_config, build_config_name=preset)
     builder = factory.get_builder("Client")
@@ -140,7 +131,7 @@ def commandlet(ctx, task):
     presets = get_validate_presets(run_config)
 
     if not task or task not in presets:
-        L.error("Task %s does not exist", task) 
+        print("Task: %s does not exist", task)
     else:
         commandlet = commandlets.BaseUE4Commandlet(run_config, task)
         commandlet.run()
@@ -237,7 +228,7 @@ def process_client_results(ctx):
     # Find the raw test folder
     run_config = ctx.obj['RUN_CONFIG']
 
-    run_processor = ClientRunProcessor.ClientRunParser(run_config)
+    ClientRunProcessor.ClientRunParser(run_config)
 
 
 if __name__ == "__main__":
