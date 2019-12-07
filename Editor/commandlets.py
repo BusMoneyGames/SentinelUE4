@@ -136,7 +136,7 @@ class BaseUE4Commandlet:
         temp_dump_file = os.path.join(self.raw_log_path, self.log_file_name)
 
         if not os.path.exists(os.path.dirname(temp_dump_file)):
-            os.mkdir(os.path.dirname(temp_dump_file))
+            os.makedirs(os.path.dirname(temp_dump_file))
 
         popen = subprocess.Popen(commandlet_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
@@ -162,6 +162,7 @@ class BaseUE4Commandlet:
 
     def parse_log(self, log_path):
 
+        return
         parser = get_commandlet_log_parser(self.commandlet_name, log_path)
         data = parser.get_data()
 
