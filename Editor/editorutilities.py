@@ -20,6 +20,12 @@ class UE4EditorUtilities:
 
         self.engine_root_path = pathlib.Path(self.environment_structure[ue4_constants.ENGINE_ROOT_PATH])
 
+    def _get_engine_root(self):
+        engine_root_folder = self.project_root_path.joinpath(self.environment_structure[
+            ue4_constants.ENGINE_ROOT_PATH]).resolve()
+
+        return engine_root_folder
+
     def get_editor_executable_path(self):
 
         file_name = self.ue_structure[ue4_constants.UNREAL_ENGINE_WIN64_CMD_EXE] + self._get_executable_ext()
@@ -32,11 +38,21 @@ class UE4EditorUtilities:
 
         return executable
 
+    def get_built_batfiles_path(self):
+        engine_root_folder = self._get_engine_root()
+        path = engine_root_folder.joinpath("Engine","Build", "BatchFiles")
+
+        return path
+
+    def get_unreal_automation_tool_path(self):
+        # TODO other platforms
+        uat_path = self.get_built_batfiles_path().joinpath("RunUAT.bat")
+
+        return uat_path
+
     def get_unreal_build_tool_path(self):
 
-        engine_root_folder = self.project_root_path.joinpath(self.environment_structure[
-                                                                 ue4_constants.ENGINE_ROOT_PATH]).resolve()
-
+        engine_root_folder = self._get_engine_root()
         engine_root_folder = engine_root_folder.joinpath("Engine")
 
         file_name = self.ue_structure[ue4_constants.UNREAL_ENGINE_UBT_EXE] + self._get_executable_ext()
@@ -85,38 +101,3 @@ class UE4EditorUtilities:
         L.error("Unable to find project file at: %s", path)
         quit(1)
         raise FileNotFoundError
-
-
-def clean_unreal_project(project_root_folder):
-    """
-
-    :param project_root_folder: folder containing the uproject file
-    :return:
-    """
-
-    project_root_folder = pathlib.Path(project_root_folder)
-    root_folders_to_remove = ["Intermediate", "Saved", "Binaries", ".vs"]
-
-    folders_to_remove = []
-
-    for each_dir_to_remove in root_folders_to_remove:
-        dir_to_remove = project_root_folder.joinpath(each_dir_to_remove)
-        if dir_to_remove.exists():
-            folders_to_remove.append(dir_to_remove)
-
-    project_root_folder.joinpath("Plugins")
-
-    for each_plugin in project_root_folder.joinpath("Plugins").glob("*"):
-        for each_root_folder_to_remove in root_folders_to_remove:
-            plugin_dir_to_remove = each_plugin.joinpath(each_root_folder_to_remove)
-            if plugin_dir_to_remove.exists():
-                folders_to_remove.append(plugin_dir_to_remove)
-
-    # Deletes the folders that were found
-    for each_folder in folders_to_remove:
-        try:
-            shutil.rmtree(each_folder.as_posix())
-            print("Deleting: ", each_folder.as_posix())
-        except Exception as e:
-            print(e)
-            print("Unable to remove ", each_folder.as_posix())

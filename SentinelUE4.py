@@ -7,9 +7,8 @@ import shutil
 import click
 
 import ue4_constants
-from Editor import buildcommands, commandlets, packageinspection
+from Editor import buildcommands, commandlets, packageinspection, automationrunner
 from Game import clientrunner, clientutilities
-from Game.LogProcessor import ClientRunProcessor
 
 def _read_config(path):
     """Reads the assembled config"""
@@ -228,7 +227,22 @@ def process_client_results(ctx):
     # Find the raw test folder
     run_config = ctx.obj['RUN_CONFIG']
 
-    ClientRunProcessor.ClientRunParser(run_config)
+    print ("Not implemented")
+    # ClientRunProcessor.ClientRunParser(run_config)
+
+
+@cli.group()
+def automation():
+    """runs automation tests"""
+
+@automation.command()
+@click.pass_context
+def list_automation(ctx):
+
+    # Find the raw test folder
+    run_config = ctx.obj['RUN_CONFIG']
+
+    automationrunner.run_tests(run_config)
 
 
 if __name__ == "__main__":
