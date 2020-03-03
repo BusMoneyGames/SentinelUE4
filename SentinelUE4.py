@@ -3,7 +3,7 @@ import pathlib
 import sys
 import logging
 import shutil
-
+import pprint
 import click
 
 import ue4_constants
@@ -38,13 +38,15 @@ def is_config_valid(config):
     """Check if the config is valid"""
 
     env = config["environment"]
-    
+
     # check if the engine root path key exists and check if the path exists on disk
     if not env["engine_root_path"]:
         print("Engine root key not found in config")
+        pprint.pprint(config)
         return False
     elif not pathlib.Path(env["engine_root_path"]).exists():
         print("Engine Path Not found at:" + pathlib.Path(env["engine_root_path"]).as_posix())
+        pprint.pprint(config)
         return False
     else:
         return True
