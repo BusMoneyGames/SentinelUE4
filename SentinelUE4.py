@@ -40,8 +40,14 @@ def is_config_valid(config):
     env = config["environment"]
     
     # check if the engine root path key exists and check if the path exists on disk
-    return env["engine_root_path"] and pathlib.Path(env["engine_root_path"]).exists()
-
+    if not env["engine_root_path"]:
+        print("Engine root key not found in config")
+        return False
+    elif not pathlib.Path(env["engine_root_path"]).exists():
+        print("Engine Path Not found at:" + pathlib.Path(env["engine_root_path"]).as_posix())
+        return False
+    else:
+        return True
 
 @click.group()
 @click.option('--project_root', default="", help="Path to the config overwrite folder")
