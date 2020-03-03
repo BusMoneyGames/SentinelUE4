@@ -10,6 +10,8 @@ import ue4_constants
 from Editor import buildcommands, commandlets, packageinspection, automationrunner
 from Game import clientrunner, clientutilities
 
+L = logging.getLogger(__name__)
+
 def _read_config(path):
     """Reads the assembled config"""
 
@@ -32,6 +34,14 @@ def get_validate_presets(default_run_config):
     """ Read the commandlets settings from the config """
     return dict(default_run_config[ue4_constants.COMMANDLET_SETTINGS])
 
+def is_config_valid(config):
+    """Check if the config is valid"""
+
+    env = config["environment"]
+    
+    # check if the engine root path key exists and check if the path exists on disk
+    return env["engine_root_path"] and pathlib.Path(env["engine_root_path"]).exists()
+
 
 @click.group()
 @click.option('--project_root', default="", help="Path to the config overwrite folder")
@@ -44,10 +54,19 @@ def cli(ctx, project_root, debug, output,no_version):
 
     config_path = pathlib.Path(project_root).joinpath("_generated_sentinel_config.json")
 
+    config = _read_config(config_path)
+    if not is_config_valid(config):
+        print("Environment config invalid... exiting")
+        sys.exit(1)
+
     ctx.ensure_object(dict)
     ctx.obj['GENERATED_CONFIG_PATH'] = project_root
-    ctx.obj['RUN_CONFIG'] = _read_config(config_path)
+    ctx.obj['RUN_CONFIG'] = config
     ctx.obj['OUTPUT_TYPE'] = output
+
+    # UE4 Needs to be available
+
+
 
 
 @cli.group()
