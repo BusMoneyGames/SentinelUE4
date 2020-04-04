@@ -41,12 +41,13 @@ def is_config_valid(config):
 
     # check if the engine root path key exists and check if the path exists on disk
     if not env["engine_root_path"]:
-        print("Engine root key not found in config")
-        pprint.pprint(config)
+        print(r"Engine root key not found in config")
+        print(r"This usually means that the installation of unreal was not registerd in the registry")
+        print(r"It can be fixed by either Adding an entry to the  registry SOFTWARE\EpicGames\Unreal Engine or re-installing UE4")
+        
         return False
     elif not pathlib.Path(env["engine_root_path"]).exists():
         print("Engine Path Not found at:" + pathlib.Path(env["engine_root_path"]).as_posix())
-        pprint.pprint(config)
         return False
     else:
         return True
