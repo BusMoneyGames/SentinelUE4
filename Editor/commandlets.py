@@ -2,6 +2,7 @@
 import subprocess
 import json
 import os
+import sys
 import logging
 import pathlib
 import Editor.LogProcesser.commandletparsers as commandletparsers
@@ -49,6 +50,12 @@ class BaseUE4Commandlet:
 
         self.commandlet_settings = commandlet_settings_config[self.commandlet_name]
 
+        if "should_ignore_exit_code" in self.commandlet_settings:
+            L.info("Overwriting the exit code with 0")
+            self.ignore_exitcode = self.commandlet_settings["should_ignore_exit_code"]
+        else:
+            self.ignore_exitcode = False
+        
         # Getting paths and making them absolute
         self.project_root_path = pathlib.Path(self.environment_config[ue4_constants.UNREAL_PROJECT_ROOT]).resolve()
 
@@ -155,8 +162,12 @@ class BaseUE4Commandlet:
         if popen.returncode == 0:
             L.info("Command ran successfully")
         else:
-            import sys
+            if self.ignore_exitcode:
+                L.info(f"Overwriting exit code {self.ignore_exitcode} with 0")
+                sys.exit(0)
+
             L.warning("Process exit with exit code: %s", popen.returncode)
+            
             sys.exit(popen.returncode)
 
 
@@ -175,7 +186,6 @@ class BaseUE4Commandlet:
         f = open(directory.joinpath(log_name), "w")
         f.write(json.dumps(data, indent=4))
         f.close()
-
 
 def get_commandlet_class(run_config, commandlet_name):
     """
